@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamentos de Redes Inalámbricas · Semana 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Overpass:wght@400;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="../assets/presentacion.css">
+  <script src="../assets/tema.js"></script>
+  <style>
+    /* Mapa de la arquitectura GSM */
+    .arq svg { width: 100%; height: auto; max-height: calc(var(--u) * 60); display: block; font-family: var(--f-texto); }
+    .arq .caja rect { fill: var(--caja-diagrama); }
+    .arq .caja text { fill: var(--texto-caja-diagrama); font-size: 22px; font-weight: 800; }
+    .arq .caja text.sub { font-size: 15px; font-weight: 600; }
+    .arq .externo rect { fill: none; stroke: var(--caja-diagrama); stroke-width: 3; }
+    .arq .externo text { fill: var(--tinta); }
+    .arq .enlace { stroke: var(--acento); stroke-width: 4; fill: none; }
+    .arq .enlace.radio { stroke-dasharray: 10 7; }
+    .arq .enlace.gestion { stroke: var(--tinta-suave); stroke-width: 2.5; stroke-dasharray: 3 6; }
+    .arq .interfaz { fill: var(--acento); font-family: var(--f-codigo); font-size: 17px; font-weight: 600; }
+    .arq .subsistema rect { fill: none; stroke: var(--tinta-suave); stroke-width: 2; stroke-dasharray: 8 6; }
+    .arq .subsistema text { fill: var(--tinta-suave); font-size: 18px; font-weight: 800; }
+    /* Animación tiempo-frecuencia (anim-tdma.js) */
+    .tf svg { width: 100%; height: auto; max-height: calc(var(--u) * 58); display: block; font-family: var(--f-texto); }
+    .tf .banda { fill: var(--superficie); stroke: var(--regla); stroke-width: 2; }
+    .tf .rejilla { stroke: var(--regla); stroke-width: 1.5; }
+    .tf .limite-trama { stroke: var(--tinta-suave); stroke-width: 3; }
+    .tf .eje, .tf .cota { stroke: var(--tinta-suave); stroke-width: 2; fill: none; }
+    .tf .rot { fill: var(--tinta-suave); font-size: 17px; }
+    .tf .rot-fuerte { fill: var(--tinta); font-size: 18px; font-weight: 800; }
+    .tf .tu { fill: var(--acento); }
+    .tf .otro { fill: var(--caja-diagrama); opacity: 0.6; }
+    .tf .capa { opacity: 0; transition: opacity 300ms ease; }
+    .tf .capa.on { opacity: 1; }
+    .tf .rafaga { transition: transform 650ms ease; }
+    .lectura .tf .capa { opacity: 1; }
+    .lectura .arq { overflow-x: auto; }
+    .lectura .arq svg { min-width: 680px; }
+    .presentacion .respuesta-ia { font-size: calc(var(--u) * 2.75); }
+    .presentacion .grafico-ancho { grid-template-columns: 1.7fr 1fr; gap: calc(var(--u) * 4); }
+  </style>
+</head>
+<body data-curso="redes-inalambricas" data-formato="clinica" data-bloque4="Primer trabajo">
+<div class="barra-lectura">
+  <a href="../index.html">Volver al curso</a>
+  <button type="button" class="boton" data-alternar-tema>Modo oscuro</button>
+</div>
+<main class="escenario">
+
+  <section class="diapositiva portada">
+    <div class="portada-panel">
+      <span>Semana</span>
+      <span class="semana-numero">1</span>
+      <span>de 7</span>
+    </div>
+    <div class="portada-texto">
+      <p class="curso">Fundamentos de Redes Inalámbricas</p>
+      <h1>Fundamentos de comunicaciones GSM</h1>
+      <p class="objetivo">Ubicar cada componente de GSM en su lugar, seguir paso a paso cómo la red reconoce tu SIM y calcular cuántas llamadas caben en una celda.</p>
+      <p class="fecha">Martes 27 de octubre · 19:00</p>
+      <div class="recorrido-completo"></div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo funciona este curso</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span><strong>Antes de cada sesión</strong>, repasa con el tutor de la semana (20–30 minutos con ChatGPT, Gemini o Claude). Al final te da un ticket de entrada con tu duda: envíalo en el <a href="https://forms.cloud.microsoft/r/h4WBZUxVVN">formulario de tickets</a> hasta las 12:00 del día de la sesión.</span></li>
+      <li data-paso="2"><span><strong>En la sesión</strong> empezamos con una pista para el Aprendizaje Práctico del domingo, interpretamos lo que produce una IA y resuelves tu propio ejercicio. No se califica: te prepara para lo que sí.</span></li>
+      <li data-paso="3"><span><strong>Si no puedes venir</strong>, la grabación queda disponible y el ejercicio individual está al final de cada presentación.</span></li>
+    </ul>
+    <p class="nota">Todo el material está en el sitio del curso: presentaciones, tutores, ejemplos y las guías de cada trabajo.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Plan de hoy</h2>
+    <ol class="plan">
+      <li data-bloque="1">Pista para el Aprendizaje Práctico, tres ideas y una pregunta rápida.</li>
+      <li data-bloque="2">El mapa de GSM. Le pedimos a la IA el flujo de autenticación y lo reconstruimos con la teoría.</li>
+      <li data-bloque="3">Cada uno dimensiona su propia celda GSM. Lo revisamos en pantalla compartida.</li>
+      <li data-bloque="4">El Aprendizaje Autónomo 1 completo: qué pide, cómo se califica y tus dudas.</li>
+      <li data-bloque="5">Repaso para el domingo y cómo usar el tutor.</li>
+    </ol>
+  </section>
+
+  <!-- ============ BLOQUE 1 · PUENTE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="1">
+    <span class="numero">1</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Para el Aprendizaje Práctico de este domingo</h2>
+    <p class="pista">Para cada sigla de GSM, pregúntate qué hace: ¿habla por radio, controla, conmuta, guarda datos (¿para siempre o de paso?) o supervisa? Para cada interfaz y protocolo, ¿entre qué dos puntos va? Y no confundas cómo se reparte el espectro en frecuencia con cómo se reparte una portadora en el tiempo.</p>
+    <p class="nota">Una pista, no la pregunta. El cuestionario vence el domingo 1 de noviembre.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tres ideas para llevarse</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span>GSM tiene tres subsistemas: el <strong>BSS</strong> se ocupa de la radio (BTS y BSC), el <strong>NSS</strong> conmuta y guarda los datos de los suscriptores (MSC, VLR, HLR, AuC, EIR, GMSC) y el <strong>OSS</strong> opera y mantiene la red.</span></li>
+      <li data-paso="2"><span>Reparte el espectro dos veces: en frecuencia, con portadoras de 200 kHz (<strong>FDMA</strong>), y cada portadora en el tiempo, con 8 <em>timeslots</em> (<strong>TDMA</strong>). El salto de frecuencia reparte la interferencia.</span></li>
+      <li data-paso="3"><span>La SIM y el AuC comparten una clave <strong>Ki</strong> que nunca viaja. La red te reconoce con un desafío (RAND) y tu respuesta (SRES), calculada con el algoritmo <strong>A3</strong>. El <strong>TMSI</strong> evita que tu IMSI viaje por el aire.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Si piensas como programador</h2>
+    <table class="tabla">
+      <thead><tr><th>En GSM</th><th>Se parece a</th><th>Qué lo distingue</th></tr></thead>
+      <tbody>
+        <tr><td><code>HLR</code></td><td>la base de datos principal de usuarios</td><td>una por operador; registro maestro de cada suscripción y de dónde está ahora</td></tr>
+        <tr><td><code>VLR</code></td><td>una caché por zona</td><td>copia de los datos mientras estás en su área; se borra cuando te vas</td></tr>
+        <tr><td><code>IMSI</code></td><td>la clave primaria</td><td>identifica la suscripción; va en la SIM y en el HLR</td></tr>
+        <tr><td><code>TMSI</code></td><td>un token de sesión</td><td>lo asigna el VLR y cambia; viaja por el aire en lugar del IMSI</td></tr>
+        <tr><td><code>MSISDN</code></td><td>el nombre de usuario visible</td><td>tu número de teléfono, por ejemplo +593 9…</td></tr>
+        <tr><td><code>IMEI</code></td><td>el número de serie del equipo</td><td>identifica el teléfono, no la SIM; se consulta en el EIR</td></tr>
+        <tr><td><code>Ki</code></td><td>un secreto compartido, como la clave de un HMAC</td><td>está solo en la SIM y en el AuC; nunca se transmite</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva pregunta">
+    <p class="nota">Responde en el Forms del chat de la reunión</p>
+    <p class="enunciado">Alguien graba todo lo que tu celular transmite por radio mientras la red lo autentica. ¿Qué dato no puede obtener?</p>
+    <ol class="opciones">
+      <li>RAND</li>
+      <li>SRES</li>
+      <li>TMSI</li>
+      <li>Ki</li>
+    </ol>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Qué viaja por el aire y qué no</h2>
+    <table class="tabla">
+      <thead><tr><th>Dato</th><th>¿Viaja por radio?</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td><code>RAND</code></td><td class="resultado">sí</td><td>es el desafío: un número aleatorio de 128 bits, distinto cada vez</td></tr>
+        <tr data-paso="2"><td><code>SRES</code></td><td class="resultado">sí</td><td>es la respuesta de 32 bits; sirve solo para ese RAND</td></tr>
+        <tr data-paso="3"><td><code>TMSI</code></td><td class="resultado">sí</td><td>es un alias temporal: quien lo escucha no sabe qué IMSI hay detrás</td></tr>
+        <tr data-paso="4"><td><code>Ki</code></td><td class="resultado">nunca</td><td>la SIM calcula la respuesta adentro; la clave no sale de ella</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="5">Respuesta: <mark>Ki</mark>. Con un par RAND–SRES grabado no se puede volver a entrar: la próxima vez la red enviará otro RAND.</p>
+  </section>
+
+  <!-- ============ BLOQUE 2 · CASO EN VIVO ============ -->
+
+  <section class="diapositiva bloque" data-bloque="2">
+    <span class="numero">2</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Primero el mapa de GSM. Después le pedimos a la IA el flujo de autenticación y lo reconstruimos con la teoría.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El mapa de GSM</h2>
+    <figure class="arq">
+      <svg viewBox="0 0 1000 480" role="img" aria-label="Arquitectura GSM: el móvil se conecta por la interfaz Um a la BTS; la BTS por Abis a la BSC; la BSC por la interfaz A al MSC/VLR. El MSC usa MAP sobre SS7 para hablar con el HLR, el AuC y el EIR. El GMSC conecta con la PSTN. El OSS opera y mantiene el BSS y el NSS.">
+        <g data-paso="1">
+          <g class="subsistema"><rect x="158" y="95" width="377" height="150" rx="14"/><text x="172" y="232">BSS · estación base</text></g>
+          <line class="enlace radio" x1="120" y1="156" x2="170" y2="156"/>
+          <line class="enlace" x1="320" y1="156" x2="370" y2="156"/>
+          <text class="interfaz" x="140" y="144" text-anchor="middle">Um</text>
+          <text class="interfaz" x="345" y="144" text-anchor="middle">Abis</text>
+          <g class="caja"><rect x="0" y="120" width="120" height="72" rx="10"/><text x="60" y="152" text-anchor="middle">Móvil</text><text class="sub" x="60" y="176" text-anchor="middle">MS + SIM</text></g>
+          <g class="caja"><rect x="170" y="120" width="150" height="72" rx="10"/><text x="245" y="152" text-anchor="middle">BTS</text><text class="sub" x="245" y="176" text-anchor="middle">radio de la celda</text></g>
+          <g class="caja"><rect x="370" y="120" width="150" height="72" rx="10"/><text x="445" y="152" text-anchor="middle">BSC</text><text class="sub" x="445" y="176" text-anchor="middle">controla varias BTS</text></g>
+        </g>
+        <g data-paso="2">
+          <g class="subsistema"><rect x="560" y="95" width="380" height="295" rx="14"/><text x="575" y="377">NSS · conmutación y datos</text></g>
+          <line class="enlace" x1="520" y1="156" x2="590" y2="156"/>
+          <text class="interfaz" x="555" y="144" text-anchor="middle">A</text>
+          <g class="caja"><rect x="590" y="120" width="170" height="72" rx="10"/><text x="675" y="152" text-anchor="middle">MSC / VLR</text><text class="sub" x="675" y="176" text-anchor="middle">conmuta · datos de visita</text></g>
+        </g>
+        <g data-paso="3">
+          <line class="enlace" x1="650" y1="192" x2="627" y2="265"/>
+          <line class="enlace" x1="730" y1="192" x2="877" y2="265"/>
+          <line class="enlace" x1="682" y1="301" x2="697" y2="301"/>
+          <text class="interfaz" x="718" y="236" text-anchor="middle">MAP sobre SS7</text>
+          <g class="caja"><rect x="572" y="265" width="110" height="72" rx="10"/><text x="627" y="297" text-anchor="middle">HLR</text><text class="sub" x="627" y="321" text-anchor="middle">base principal</text></g>
+          <g class="caja"><rect x="697" y="265" width="110" height="72" rx="10"/><text x="752" y="297" text-anchor="middle">AuC</text><text class="sub" x="752" y="321" text-anchor="middle">Ki y tripletes</text></g>
+          <g class="caja"><rect x="822" y="265" width="110" height="72" rx="10"/><text x="877" y="297" text-anchor="middle">EIR</text><text class="sub" x="877" y="321" text-anchor="middle">equipos · IMEI</text></g>
+        </g>
+        <g data-paso="4">
+          <line class="enlace" x1="760" y1="156" x2="810" y2="156"/>
+          <line class="enlace" x1="865" y1="120" x2="865" y2="62"/>
+          <g class="caja"><rect x="810" y="120" width="110" height="72" rx="10"/><text x="865" y="152" text-anchor="middle">GMSC</text><text class="sub" x="865" y="176" text-anchor="middle">pasarela</text></g>
+          <g class="externo"><rect x="810" y="6" width="110" height="56" rx="10"/><text x="865" y="42" text-anchor="middle" style="font-size: 20px; font-weight: 800">PSTN</text></g>
+        </g>
+        <g data-paso="5">
+          <line class="enlace gestion" x1="345" y1="245" x2="345" y2="412"/>
+          <line class="enlace gestion" x1="750" y1="390" x2="750" y2="412"/>
+          <g class="subsistema"><rect x="150" y="412" width="790" height="60" rx="14" style="stroke-dasharray: none"/><text x="545" y="449" text-anchor="middle" style="fill: var(--tinta)">OSS · operación y mantenimiento: alarmas, configuración y estadísticas</text></g>
+        </g>
+      </svg>
+      <figcaption>Cada caja es un componente; cada línea, una interfaz. Las líneas punteadas del OSS son de gestión, no llevan llamadas. En el celular, desliza el mapa hacia los lados.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Enciendes el celular: la historia completa</h2>
+    <table class="tabla">
+      <thead><tr><th>Momento</th><th>Qué pasa</th><th>Quiénes</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>1. Busca la red</td><td>Se sincroniza (FCCH, SCH) y lee el BCCH: qué red, qué celda, qué vecinas.</td><td>móvil y BTS</td></tr>
+        <tr data-paso="2"><td>2. Pide la palabra</td><td>Pide acceso (RACH) y recibe un canal de señalización (SDCCH).</td><td>móvil, BTS, BSC</td></tr>
+        <tr data-paso="3"><td>3. Dice quién es</td><td>Envía su TMSI; el MSC/VLR pide tripletes al HLR/AuC.</td><td>VLR y HLR/AuC (MAP)</td></tr>
+        <tr data-paso="4"><td>4. Lo demuestra</td><td>Recibe un RAND y responde con SRES, calculada con la Ki. Se cifra la radio.</td><td>SIM y MSC (DTAP)</td></tr>
+        <tr data-paso="5"><td>5. Avisa dónde está</td><td>El VLR lo registra y el HLR anota en qué VLR está.</td><td>VLR y HLR (MAP)</td></tr>
+        <tr data-paso="6"><td>6. Lo llaman</td><td>El GMSC pregunta al HLR; el MSC lo busca (PCH) y le da un canal de voz (TCH).</td><td>GMSC, HLR, MSC</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Le pedimos a la IA el flujo de autenticación</h2>
+    <div class="dos-columnas">
+      <div>
+        <p>Le pedimos:</p>
+        <pre class="prompt">Explícame paso a paso cómo una red GSM autentica a un suscriptor cuando enciende su teléfono. Indica qué componente participa en cada paso (SIM, BTS, BSC, MSC/VLR, HLR, AuC) y qué datos se intercambian.</pre>
+      </div>
+      <div>
+        <h3>Para interpretar su respuesta</h3>
+        <ul>
+          <li data-paso="1">¿Quién conoce la clave Ki? ¿Aparece alguna vez viajando en la respuesta?</li>
+          <li data-paso="2">¿Por qué la red envía un número aleatorio y no pide una contraseña fija?</li>
+          <li data-paso="3">¿Qué protocolo lleva cada mensaje, y entre qué componentes?</li>
+          <li data-paso="4">¿Qué no comprueba este proceso?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que respondió, leído con la teoría</h2>
+    <div class="dos-columnas">
+      <pre class="prompt respuesta-ia">1. El teléfono se identifica con su TMSI (o con su IMSI, si la red no lo conoce).
+2. El MSC/VLR pide al HLR/AuC datos de autenticación para ese IMSI.
+3. El AuC genera un RAND y, con la Ki del suscriptor, calcula SRES (A3) y Kc (A8). Devuelve varios tripletes.
+4. La red envía el RAND al teléfono.
+5. La SIM calcula su SRES y su Kc con la misma Ki y responde con SRES.
+6. El VLR compara: si las dos SRES coinciden, el suscriptor queda autenticado.
+7. Desde ahí, la radio se cifra con A5 usando Kc, y la red asigna un TMSI nuevo.</pre>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Pasos 2–3:</strong> van por <strong>MAP</strong> sobre SS7, entre el MSC/VLR y el HLR/AuC. El VLR guarda tripletes de reserva para no consultar al HLR cada vez.</span></li>
+        <li data-paso="2"><span><strong>Pasos 1, 4 y 5:</strong> son mensajes entre el teléfono y el MSC (<strong>DTAP</strong>). La BTS y la BSC los transportan sin interpretarlos.</span></li>
+        <li data-paso="3"><span><strong>Paso 7:</strong> el MSC entrega Kc a la BSC con <strong>BSSMAP</strong>; la BTS cifra solo el tramo de radio.</span></li>
+        <li data-paso="4"><span><strong>Lo que no dice:</strong> el teléfono nunca comprueba que la red sea legítima. La autenticación va en un solo sentido.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El mismo flujo, mensaje por mensaje</h2>
+    <figure class="secuencia" data-actores="Móvil + SIM, BTS + BSC, MSC / VLR, HLR / AuC">
+      <ol>
+        <li data-de="Móvil + SIM" data-a="MSC / VLR" data-nota="DTAP">Me identifico: TMSI</li>
+        <li data-de="MSC / VLR" data-a="HLR / AuC" data-nota="MAP">Tripletes para el IMSI</li>
+        <li data-de="HLR / AuC" data-a="MSC / VLR" data-tipo="respuesta" data-nota="MAP">RAND, SRES, Kc</li>
+        <li data-de="MSC / VLR" data-a="Móvil + SIM" data-nota="DTAP">Desafío: RAND</li>
+        <li data-de="Móvil + SIM" data-a="Móvil + SIM" data-nota="A3 y A8 con la Ki">Calcula SRES y Kc</li>
+        <li data-de="Móvil + SIM" data-a="MSC / VLR" data-tipo="respuesta" data-nota="DTAP">Respuesta: SRES</li>
+        <li data-de="MSC / VLR" data-a="MSC / VLR" data-nota="¿coinciden las dos?">Compara SRES</li>
+        <li data-de="MSC / VLR" data-a="BTS + BSC" data-nota="BSSMAP">Cifra con esta Kc</li>
+        <li data-de="BTS + BSC" data-a="Móvil + SIM" data-nota="radio cifrada">Empieza A5</li>
+        <li data-de="MSC / VLR" data-a="Móvil + SIM" data-nota="ya cifrado">TMSI nuevo</li>
+      </ol>
+      <figcaption>Autenticación y cifrado en GSM. Los mensajes del móvil al MSC pasan por la BTS y la BSC; se dibujan directos para leerlos mejor.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que protege y lo que no</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>Protege</h3>
+        <ul class="ideas compactas">
+          <li data-paso="1"><span><strong>La clave:</strong> Ki no sale de la SIM ni del AuC.</span></li>
+          <li data-paso="2"><span><strong>Tu identidad:</strong> por el aire viaja el TMSI, no el IMSI.</span></li>
+          <li data-paso="3"><span><strong>La conversación:</strong> entre el móvil y la BTS va cifrada con A5 y Kc.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>No protege</h3>
+        <ul class="ideas compactas">
+          <li data-paso="4"><span><strong>Contra una red falsa:</strong> el móvil no autentica a la red, así que una estación base falsa puede hacerse pasar por el operador.</span></li>
+          <li data-paso="5"><span><strong>Más allá de la radio:</strong> el cifrado termina en la BTS.</span></li>
+          <li data-paso="6"><span>UMTS (la próxima semana) agrega la autenticación mutua: un buen ejemplo para la conclusión de tu informe.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="nota">Pruébalo: <code>python semana-01/ejemplos/autenticacion.py</code> simula el desafío y la respuesta. Usa HMAC en lugar de A3 y A8 reales, que cada operador elige.</p>
+  </section>
+
+  <!-- ============ BLOQUE 3 · CLÍNICA ============ -->
+
+  <section class="diapositiva bloque" data-bloque="3">
+    <span class="numero">3</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>De dónde salen los números de GSM. Luego cada uno dimensiona su propia celda y lo revisamos en pantalla compartida.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La física mínima para hoy</h2>
+    <table class="tabla">
+      <thead><tr><th>Concepto</th><th>Qué significa</th><th>En GSM</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Frecuencia (Hz)</td><td>Cuántas veces por segundo oscila la onda. 1 kHz = mil veces; 1 MHz = un millón.</td><td>GSM-900 transmite cerca de 900 MHz.</td></tr>
+        <tr data-paso="2"><td>Ancho de banda</td><td>El rango de frecuencias que ocupa una señal: el ancho de su carril.</td><td>Cada portadora ocupa 200 kHz = 0,2 MHz.</td></tr>
+        <tr data-paso="3"><td>Espectro asignado</td><td>La carretera que el regulador (en Ecuador, ARCOTEL) le asigna al operador.</td><td>Un bloque de 5 MHz tiene 25 carriles de 200 kHz.</td></tr>
+        <tr data-paso="4"><td>Tasa de bits (bit/s)</td><td>Cuántos bits se envían en un segundo.</td><td>Cada portadora lleva 270,833 kbit/s, compartidos entre 8.</td></tr>
+        <tr data-paso="5"><td>ms y µs</td><td>Una milésima y una millonésima de segundo.</td><td>Una trama dura 4,615 ms; un <em>timeslot</em>, 576,9 µs.</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="6">Antes de dividir, iguala las unidades: 5 MHz / 200 kHz = 5000 kHz / 200 kHz = 25. FDMA reparte los carriles; TDMA, los turnos dentro de cada carril.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo comparte GSM el espectro</h2>
+    <div class="dos-columnas grafico-ancho">
+      <figure class="tf" id="anim-tdma">
+        <figcaption>Ejemplo en GSM-900, enlace descendente. El tiempo está a escala: 3 tramas.</figcaption>
+      </figure>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>FDMA:</strong> portadoras separadas 200 kHz.</span></li>
+        <li data-paso="2"><span><strong>TDMA:</strong> 8 <em>timeslots</em> de 576,9 µs por portadora; juntos forman una trama de 4,615 ms.</span></li>
+        <li data-paso="3"><span>Cada llamada transmite en su <em>timeslot</em> y espera el resto de la trama.</span></li>
+        <li data-paso="4"><span><strong>Salto de frecuencia:</strong> el <em>timeslot</em> cambia de portadora en cada trama; una interferencia solo daña algunas ráfagas.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>De dónde salen 576,9 µs y 4,615 ms</h2>
+    <table class="tabla">
+      <thead><tr><th>Magnitud</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Duración de un bit</td><td>1 / 270,833 kbit/s (tasa de la portadora) = 48/13 µs</td><td class="resultado">3,692 µs</td></tr>
+        <tr data-paso="2"><td><em>Timeslot</em></td><td>156,25 periodos de bit × 3,692 µs</td><td class="resultado">576,9 µs</td></tr>
+        <tr data-paso="3"><td>Trama TDMA</td><td>8 <em>timeslots</em> × 576,9 µs</td><td class="resultado">4,615 ms</td></tr>
+        <tr data-paso="4"><td>Multitrama de tráfico</td><td>26 tramas × 4,615 ms</td><td class="resultado">120 ms</td></tr>
+        <tr data-paso="5"><td>Saltos por segundo</td><td>uno por trama: 1 / 4,615 ms</td><td class="resultado">≈ 217</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="5">Los 270,833 kbit/s se reparten entre 8 usuarios. El códec de voz de GSM produce 13 kbit/s; con la codificación de canal, cada llamada ocupa 22,8 kbit/s de su <em>timeslot</em>.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ejemplo resuelto: 6 MHz con reúso K = 7</h2>
+    <table class="tabla">
+      <thead><tr><th>Paso</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Portadoras en el bloque</td><td>6 MHz / 200 kHz</td><td class="resultado">30</td></tr>
+        <tr data-paso="2"><td>Portadoras por celda</td><td>30 / 7 = 4,28 → parte entera (sobran 2)</td><td class="resultado">4</td></tr>
+        <tr data-paso="3"><td><em>Timeslots</em> por celda</td><td>4 × 8</td><td class="resultado">32</td></tr>
+        <tr data-paso="4"><td>Canales de tráfico por celda</td><td>32 − 2 reservados para señalización</td><td class="resultado">30</td></tr>
+        <tr data-paso="5"><td>Llamadas a la vez en el clúster</td><td>30 × 7 celdas</td><td class="resultado">210</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="6">Una IA que responde «30 × 8 = <strong>240 llamadas por celda</strong>» supone que todo el bloque está en una sola celda: sin reúso y sin canales de señalización.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Consigna: dimensiona tu celda</h2>
+    <p>Tu bloque, según el último dígito de tu cédula: <strong>0–1</strong> 5 MHz · <strong>2–3</strong> 7,4 MHz · <strong>4–5</strong> 8,6 MHz · <strong>6–7</strong> 10 MHz · <strong>8–9</strong> 12,4 MHz. Reúso K = 7.</p>
+    <ol>
+      <li>¿Cuántas portadoras de 200 kHz caben en tu bloque? ¿Cuántas recibe cada celda y cuántas sobran?</li>
+      <li>¿Cuántos <em>timeslots</em> y cuántos canales de tráfico tiene cada celda (reserva 2 para señalización)? ¿Cuántas llamadas a la vez caben en el clúster?</li>
+      <li>Interpreta a la IA: para tu bloque diría «portadoras × 8 llamadas por celda». ¿Qué supuso? ¿En qué caso sería cierto?</li>
+      <li>¿Qué cambia si el operador usa K = 4? ¿Qué gana y qué arriesga?</li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Comprueba con <code>python dimensionamiento.py &lt;MHz&gt; 7</code> (en <code>semana-01/ejemplos</code>). ¿Quieres mostrar tu resultado en pantalla? Avísame por chat.</p>
+      <button class="temporizador" type="button" data-minutos="20" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 4 · APRENDIZAJE AUTÓNOMO 1 ============ -->
+
+  <section class="diapositiva bloque" data-bloque="4">
+    <span class="numero">4</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Todo el Aprendizaje Autónomo 1, hoy: la sesión de la próxima semana cae en feriado.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Aprendizaje Autónomo 1</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>Qué entregas</h3>
+        <ul>
+          <li>Un informe de 3 a 4 páginas sobre GSM, con introducción, desarrollo, conclusiones y referencias en APA 7.</li>
+          <li>Cinco temas: arquitectura (BSS y NSS), digitalización de la voz, acceso múltiple, <em>handover</em> y autenticación.</li>
+          <li>Las 5 preguntas guía del enunciado, respondidas.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Aclaraciones al enunciado</h3>
+        <ul>
+          <li>Es <strong>individual</strong>.</li>
+          <li>Cubre solo GSM, el tema de esta semana.</li>
+          <li>En la autenticación incluye la <strong>SIM</strong> y el <strong>AuC</strong>, aunque el enunciado no los nombre.</li>
+          <li>Vence el <strong>domingo 15 de noviembre</strong>.</li>
+        </ul>
+        <p><a href="../ver.html?f=entregas/aa1.md">Guía completa y rúbrica</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo se califica</h2>
+    <ul class="cierre-lista">
+      <li data-paso="1"><span class="que">Revisión de literatura y análisis crítico</span><span>Los 5 temas y las 5 preguntas, y cómo <strong>interactúan</strong> los componentes en un flujo completo, con un diagrama propio. Listarlos no basta.</span></li>
+      <li data-paso="2"><span class="que">Discusión y conclusiones</span><span>Conecta GSM con las redes actuales mediante un ejemplo concreto, no con una frase general.</span></li>
+      <li data-paso="3"><span class="que">Referencias y redacción</span><span>Al menos 3 fuentes confiables que existan y digan lo que citas. APA 7, 3–4 páginas, redacción formal.</span></li>
+    </ul>
+    <p class="nota" data-paso="4">Lo que más baja la nota: confundir HLR con VLR o TDMA con FDMA, y citar una referencia que no existe.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tu flujo, con tu diagrama</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>Elige un flujo completo</h3>
+        <ul>
+          <li><strong>Autenticación:</strong> la que reconstruimos hoy. Dibújala con tus palabras y cita tu fuente.</li>
+          <li><strong>Una llamada entrante:</strong> desde la PSTN hasta tu móvil. ¿A quién pregunta el GMSC dónde estás?</li>
+          <li><strong><em>Handover</em>:</strong> el móvil mide la señal de las celdas vecinas y la red decide cambiarlo de celda.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Quién coordina un <em>handover</em></h3>
+        <table class="tabla">
+          <thead><tr><th>Entre celdas de…</th><th>Coordina</th></tr></thead>
+          <tbody>
+            <tr><td>la misma BSC</td><td>la BSC (avisa al MSC al terminar)</td></tr>
+            <tr><td>distintas BSC</td><td>el MSC</td></tr>
+            <tr><td>distintos MSC</td><td>los dos MSC, por MAP</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Fuentes y APA 7</h2>
+    <ul class="ideas compactas">
+      <li><span><strong>Fuentes confiables:</strong> libros de comunicaciones móviles, artículos académicos y las especificaciones de ETSI o 3GPP (gratuitas en sus sitios).</span></li>
+      <li><span><strong>La IA puede buscar y ayudarte a redactar</strong>, pero abre cada referencia: debe existir y decir lo que citas. Una referencia inventada cuenta como si no hubiera referencia.</span></li>
+      <li><span><strong>Una especificación se cita</strong> con la organización como autor, el año de la versión, el título en cursiva, el número y la versión entre paréntesis, y la URL.</span></li>
+    </ul>
+    <pre class="prompt" style="margin-top: calc(var(--u) * 3)">3rd Generation Partnership Project. (año de la versión). <em>Título de la especificación</em> (3GPP TS número, versión). URL
+En el texto: (3rd Generation Partnership Project [3GPP], año) la primera vez; luego (3GPP, año).</pre>
+  </section>
+
+  <!-- ============ BLOQUE 5 · CIERRE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="5">
+    <span class="numero">5</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Repaso para el domingo y cómo usar el tutor.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Interfaces y protocolos: entre qué dos puntos</h2>
+    <table class="tabla">
+      <thead><tr><th>Nombre</th><th>Entre</th><th>Qué lleva</th></tr></thead>
+      <tbody>
+        <tr><td><code>Um</code></td><td>móvil ↔ BTS</td><td>la radio: portadoras de 200 kHz y 8 <em>timeslots</em></td></tr>
+        <tr><td><code>Abis</code></td><td>BTS ↔ BSC</td><td>voz y señalización de las BTS hacia su controlador</td></tr>
+        <tr><td><code>A</code></td><td>BSC ↔ MSC</td><td>la frontera entre el BSS y el NSS</td></tr>
+        <tr><td><code>BSSMAP</code></td><td>MSC ↔ BSC</td><td>manejo de recursos de radio: asignar canal, <em>handover</em>, cifrado</td></tr>
+        <tr><td><code>DTAP</code></td><td>móvil ↔ MSC</td><td>autenticación, ubicación, llamadas; el BSS lo pasa sin interpretarlo</td></tr>
+        <tr><td><code>MAP</code></td><td>MSC/VLR ↔ HLR, AuC, EIR, otros MSC</td><td>consultas de suscriptores, tripletes, ubicación, <em>roaming</em></td></tr>
+        <tr><td><code>SS7</code></td><td>toda la red central</td><td>la red de señalización que transporta a MAP, BSSMAP y DTAP</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Canales lógicos: quién dice qué en la radio</h2>
+    <table class="tabla">
+      <thead><tr><th>Canal</th><th>Para qué</th></tr></thead>
+      <tbody>
+        <tr><td><code>FCCH</code></td><td>corrección de frecuencia: el móvil encuentra y ajusta la portadora</td></tr>
+        <tr><td><code>SCH</code></td><td>sincronización: el número de trama y el identificador de la BTS</td></tr>
+        <tr><td><code>BCCH</code></td><td>difunde la información del sistema: qué red es (MCC y MNC), el área de localización, la celda y la lista de celdas vecinas</td></tr>
+        <tr><td><code>PCH · RACH · AGCH</code></td><td>avisar que hay una llamada · pedir acceso · asignar un canal</td></tr>
+        <tr><td><code>SDCCH</code></td><td>señalización dedicada: autenticación, actualización de ubicación, SMS</td></tr>
+        <tr><td><code>TCH</code></td><td>tráfico: la voz (o datos) del usuario</td></tr>
+      </tbody>
+    </table>
+    <p class="nota">Ecuador tiene el MCC 740. El móvil lee el BCCH de las vecinas para medir su señal: así se prepara un <em>handover</em>.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>GSM no se quedó en la voz</h2>
+    <ul class="cierre-lista">
+      <li data-paso="1"><span class="que">GPRS</span><span>Agrega conmutación de paquetes (nodos SGSN y GGSN): datos siempre conectados y varios <em>timeslots</em> por usuario, hasta 171,2 kbit/s teóricos frente a los 9,6 kbit/s de los datos por circuito.</span></li>
+      <li data-paso="2"><span class="que">CAMEL</span><span>Servicios de red inteligente que te siguen incluso en <em>roaming</em>: prepago, números cortos o una tarifa que depende de la zona desde donde llamas.</span></li>
+      <li data-paso="3"><span class="que">BICN</span><span>Divide el MSC en un servidor que controla las llamadas y pasarelas de medios: dentro de la red central, la voz viaja sobre IP (o ATM) en vez de circuitos dedicados.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo usar el tutor</h2>
+    <ol>
+      <li>Abre el sitio del curso y pulsa <strong>Copiar tutor</strong> en la semana que corresponde.</li>
+      <li>Pégalo completo en ChatGPT, Gemini o Claude (sirve la versión gratuita).</li>
+      <li>Conversa 20–30 minutos. Te hará preguntas y no te dará respuestas: está hecho para que pienses.</li>
+      <li>Al final, envía tu ticket de entrada en el <a href="https://forms.cloud.microsoft/r/h4WBZUxVVN">formulario de tickets</a> hasta las 12:00 del día de la sesión. El enlace también está en el tutor, el anuncio y el sitio del curso.</li>
+    </ol>
+    <p class="nota">Si tienes poco tiempo, escribe RÁPIDO al empezar: irá directo a las preguntas de control.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Antes de irnos</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Este domingo, 1 nov</span><span>Aprendizaje Práctico de la semana 1.</span></li>
+      <li><span class="que">Entrega en curso</span><span>Aprendizaje Autónomo 1: vence el domingo 15 de noviembre.</span></li>
+      <li><span class="que">Si ves la grabación</span><span>Dimensiona la celda de tu bloque (consigna del bloque 3) y comprueba con <code>dimensionamiento.py</code>. Luego dibuja de memoria el flujo de autenticación, con los componentes y protocolos de cada mensaje, y compáralo con el diagrama del bloque 2.</span></li>
+      <li><span class="que">Próxima semana</span><span>UMTS. El martes 3 de noviembre es feriado: la sesión se da igual y se graba. Antes, usa el <a href="../ver.html?f=semana-02/tutor.md">tutor de la semana 2</a>.</span></li>
+    </ul>
+  </section>
+
+</main>
+<script src="../assets/secuencia.js"></script>
+<script src="anim-tdma.js"></script>
+<script src="../assets/presentacion.js"></script>
+</body>
+</html>

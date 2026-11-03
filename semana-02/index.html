@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamentos de Redes Inalámbricas · Semana 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Overpass:wght@400;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="../assets/presentacion.css">
+  <script src="../assets/tema.js"></script>
+  <style>
+    /* Diagramas SVG (mapa de UMTS, árbol OVSF, respiración celular) */
+    .arq svg { width: 100%; height: auto; max-height: calc(var(--u) * 60); display: block; font-family: var(--f-texto); }
+    .arq .caja rect { fill: var(--caja-diagrama); }
+    .arq .caja text { fill: var(--texto-caja-diagrama); font-size: 22px; font-weight: 800; }
+    .arq .caja text.sub { font-size: 15px; font-weight: 600; }
+    .arq .externo rect { fill: none; stroke: var(--caja-diagrama); stroke-width: 3; }
+    .arq .externo text { fill: var(--tinta); font-size: 19px; font-weight: 800; }
+    .arq .enlace { stroke: var(--acento); stroke-width: 4; fill: none; }
+    .arq .enlace.radio { stroke-dasharray: 10 7; }
+    .arq .interfaz { fill: var(--acento); font-family: var(--f-codigo); font-size: 17px; font-weight: 600; }
+    .arq .subsistema rect { fill: none; stroke: var(--tinta-suave); stroke-width: 2; stroke-dasharray: 8 6; }
+    .arq .subsistema text { fill: var(--tinta-suave); font-size: 18px; font-weight: 800; }
+    .arq .codigo { fill: var(--tinta); font-family: var(--f-codigo); font-size: 18px; }
+    .arq .rot { fill: var(--tinta-suave); font-size: 17px; }
+    .arq .bloqueado rect { fill: var(--superficie); stroke: var(--tinta-suave); stroke-width: 2; stroke-dasharray: 5 5; }
+    .arq .bloqueado text { fill: var(--tinta-suave); }
+    .arq .usado rect { fill: var(--acento); }
+    .arq .usado text { fill: #FFFFFF; }
+    .arq .circulo { fill: none; stroke: var(--acento); stroke-width: 3; }
+    .arq .circulo.base { stroke: var(--caja-diagrama); stroke-width: 4; }
+    .lectura .arq { overflow-x: auto; }
+    .lectura .arq.ancho svg { min-width: 680px; }
+    .presentacion .respuesta-ia { font-size: calc(var(--u) * 2.5); }
+    .presentacion .caso-ia { grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 4); }
+    .presentacion .caso-ia .ideas.compactas li { font-size: calc(var(--u) * 3.2); }
+    .presentacion .grafico-ancho { grid-template-columns: 1fr 1.1fr; gap: calc(var(--u) * 4); }
+  </style>
+</head>
+<body data-curso="redes-inalambricas" data-formato="clinica" data-bloque4="Ejercicio aplicado">
+<div class="barra-lectura">
+  <a href="../index.html">Volver al curso</a>
+  <button type="button" class="boton" data-alternar-tema>Modo oscuro</button>
+</div>
+<main class="escenario">
+
+  <section class="diapositiva portada">
+    <div class="portada-panel">
+      <span>Semana</span>
+      <span class="semana-numero">2</span>
+      <span>de 7</span>
+    </div>
+    <div class="portada-texto">
+      <p class="curso">Fundamentos de Redes Inalámbricas</p>
+      <h1>Sistema Universal de Comunicaciones Móviles (UMTS)</h1>
+      <p class="objetivo">Entender por qué en UMTS todas las celdas comparten la misma frecuencia, calcular cuánto gana una señal ensanchada y seguir un <em>soft handover</em> medición por medición.</p>
+      <p class="fecha">Martes 3 de noviembre · 19:00 · feriado: la sesión se da y se graba igual</p>
+      <div class="recorrido-completo"></div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Plan de hoy</h2>
+    <ol class="plan">
+      <li data-bloque="1">Pista para el Aprendizaje Práctico, tres ideas y una pregunta rápida.</li>
+      <li data-bloque="2">El mapa de UMTS. Le pedimos a la IA que explique la ganancia de procesamiento y revisamos su razonamiento.</li>
+      <li data-bloque="3">Cada uno calcula la ganancia y la capacidad para su propio servicio. Lo revisamos en pantalla compartida.</li>
+      <li data-bloque="4">Un recorrido real: <em>soft handover</em> frente a <em>hard handover</em>, segundo a segundo.</li>
+      <li data-bloque="5">Canales, estados y seguridad: repaso para el domingo, y el tutor de la próxima semana.</li>
+    </ol>
+  </section>
+
+  <!-- ============ BLOQUE 1 · PUENTE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="1">
+    <span class="numero">1</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Para el Aprendizaje Práctico de este domingo</h2>
+    <p class="pista">Ubica cada elemento de UMTS: ¿es de la red de acceso radio o de la red central? Para cada canal, pregúntate para qué existe: ¿sincronizar, medir, difundir la información del sistema o avisar una llamada? Y distingue el reposo de la conexión activa, y el <em>handover</em> que suelta antes de tomar del que usa varias celdas a la vez.</p>
+    <p class="nota">Una pista, no la pregunta. El cuestionario vence el domingo 8 de noviembre.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tres ideas para llevarse</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span>UMTS separa la <strong>red de acceso radio (UTRAN)</strong>, con las estaciones base (<strong>Node B</strong>) y su controlador (<strong>RNC</strong>), de la <strong>red central</strong>: MSC/VLR para circuitos, SGSN y GGSN para paquetes, y el HLR para todos. El móvil lleva una <strong>USIM</strong>, la SIM de UMTS.</span></li>
+      <li data-paso="2"><span>Su radio es <strong>WCDMA</strong> (CDMA de banda ancha: acceso múltiple por división de código): canales de 5 MHz y una tasa de <em>chips</em> fija de <strong>3,84 Mchip/s</strong>. Todas las celdas usan la <strong>misma frecuencia</strong> y se distinguen por códigos. Por eso la carga achica la celda (<em>cell breathing</em>).</span></li>
+      <li data-paso="3"><span>Con la misma frecuencia en todas partes, el móvil puede hablar con varias celdas a la vez: <strong><em>soft handover</em></strong>, sin cortes. Además, la red y el móvil se autentican mutuamente y la señalización lleva <strong>integridad</strong>.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Si vienes de GSM</h2>
+    <table class="tabla">
+      <thead><tr><th>Aspecto</th><th>GSM (semana 1)</th><th>UMTS (hoy)</th></tr></thead>
+      <tbody>
+        <tr><td>Estación base y su controlador</td><td>BTS y BSC</td><td>Node B y RNC</td></tr>
+        <tr><td>Tarjeta del suscriptor</td><td>SIM</td><td>USIM</td></tr>
+        <tr><td>Acceso múltiple</td><td>FDMA + TDMA, juntas FTDMA: 200 kHz y 8 <em>timeslots</em></td><td>WCDMA: códigos sobre canales de 5 MHz</td></tr>
+        <tr><td>Reúso de frecuencias</td><td>K celdas distintas (por ejemplo, K = 7)</td><td>reúso 1: la misma frecuencia en todas</td></tr>
+        <tr><td><em>Handover</em> típico</td><td><em>hard</em>: suelta una celda y toma otra</td><td><em>soft</em>: varias celdas a la vez</td></tr>
+        <tr><td>Qué mide el móvil</td><td>nivel de señal de la portadora</td><td>RSCP (potencia) y Ec/No (calidad) del canal piloto</td></tr>
+        <tr><td>Seguridad</td><td>solo la red autentica al móvil</td><td>autenticación mutua e integridad</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La física mínima para hoy</h2>
+    <table class="tabla">
+      <thead><tr><th>Concepto</th><th>Qué significa</th><th>En UMTS</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td><em>Chip</em></td><td>Un pedacito de señal más corto que un bit. Cada bit viaja como un patrón de varios <em>chips</em>: el código del usuario.</td><td>Siempre 3,84 millones de <em>chips</em> por segundo (3,84 Mchip/s).</td></tr>
+        <tr data-paso="2"><td>Ganancia de procesamiento</td><td><em>Chips</em> por bit: tasa de <em>chips</em> / tasa de bits. Más <em>chips</em> por bit, más fácil sacar el bit del ruido.</td><td>Datos a 64 kbit/s: 3,84 M / 64 k = 60.</td></tr>
+        <tr data-paso="3"><td>Decibel (dB)</td><td>Una razón en escala logarítmica: 10·log<sub>10</sub>(veces). 2 veces ≈ 3 dB; 10 veces = 10 dB; 100 veces = 20 dB.</td><td>60 veces ≈ 17,8 dB.</td></tr>
+        <tr data-paso="4"><td>Eb/No</td><td>Energía de cada bit frente al ruido: la calidad mínima que necesita el receptor.</td><td>5 dB ≈ 3,16 veces.</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="5">En dB, multiplicar es sumar y dividir es restar. Un valor negativo es menos de 1 vez: la señal llega más débil que la interferencia… y aun así se recupera.</p>
+  </section>
+
+  <section class="diapositiva pregunta">
+    <p class="nota">Responde en el Forms del chat de la reunión</p>
+    <p class="enunciado">Un usuario pasa de 12,2 a 384 kbit/s. La tasa de <em>chips</em> no cambia. ¿Qué le pasa a su ganancia de procesamiento?</p>
+    <ol class="opciones">
+      <li>Sube unas 31 veces</li>
+      <li>No cambia</li>
+      <li>Baja unas 31 veces</li>
+      <li>Baja a la mitad</li>
+    </ol>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La cuenta, paso a paso</h2>
+    <table class="tabla">
+      <thead><tr><th>Magnitud</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Ganancia con voz</td><td>3,84 Mchip/s / 12,2 kbit/s</td><td class="resultado">315 ≈ 25,0 dB</td></tr>
+        <tr data-paso="2"><td>Ganancia a 384 kbit/s</td><td>3,84 Mchip/s / 384 kbit/s</td><td class="resultado">10 = 10,0 dB</td></tr>
+        <tr data-paso="3"><td>Cuánto baja</td><td>315 / 10</td><td class="resultado">31,5 veces = 15 dB</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="4">Respuesta: <mark>baja unas 31 veces</mark>. Cada bit dura menos <em>chips</em>: hay menos repeticiones para promediar el ruido. Para mantener la calidad, ese usuario necesita una relación señal a interferencia 15 dB mayor.</p>
+  </section>
+
+  <!-- ============ BLOQUE 2 · CASO EN VIVO ============ -->
+
+  <section class="diapositiva bloque" data-bloque="2">
+    <span class="numero">2</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>La idea central de UMTS y el mapa de la red. Después le pedimos a la IA que explique la ganancia de procesamiento y revisamos qué supuso.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Una idea y sus consecuencias</h2>
+    <table class="tabla">
+      <thead><tr><th>En una fiesta…</th><th>En UMTS</th><th>Se llama</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Todos hablan a la vez en la misma sala, cada pareja en su idioma.</td><td>Todos transmiten a la vez en la misma frecuencia, cada uno con su código.</td><td>WCDMA</td></tr>
+        <tr data-paso="2"><td>No hace falta repartir salas.</td><td>Todas las celdas usan la misma frecuencia.</td><td>reúso 1</td></tr>
+        <tr data-paso="3"><td>Si alguien grita, molesta a todos.</td><td>La red ajusta la potencia de cada móvil 1500 veces por segundo.</td><td>control de potencia</td></tr>
+        <tr data-paso="4"><td>Con mucha gente, a los del fondo ya no se les oye.</td><td>Con más carga, la celda se encoge.</td><td><em>cell breathing</em></td></tr>
+        <tr data-paso="5"><td>Puedes escuchar a dos amigos a la vez.</td><td>El móvil habla con varias celdas a la vez.</td><td><em>soft handover</em></td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="6">Además, UMTS separa en su red central los circuitos (voz) de los paquetes (datos) y agrega la autenticación mutua.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El mapa de UMTS</h2>
+    <figure class="arq ancho">
+      <svg viewBox="0 0 1000 470" role="img" aria-label="Arquitectura UMTS: el móvil con su USIM se conecta por la interfaz Uu al Node B; el Node B por Iub a la RNC. La RNC se conecta por Iu-CS al MSC/VLR (circuitos) y por Iu-PS al SGSN (paquetes). El GMSC conecta con la PSTN y el GGSN con Internet. MSC y SGSN consultan al HLR/AuC con MAP. Dos RNC se conectan por Iur.">
+        <g data-paso="1">
+          <g class="subsistema"><rect x="128" y="125" width="334" height="140" rx="14"/><text x="140" y="254">UTRAN · acceso radio</text></g>
+          <line class="enlace radio" x1="100" y1="186" x2="140" y2="186"/>
+          <line class="enlace" x1="270" y1="186" x2="320" y2="186"/>
+          <text class="interfaz" x="120" y="174" text-anchor="middle">Uu</text>
+          <text class="interfaz" x="295" y="174" text-anchor="middle">Iub</text>
+          <g class="caja"><rect x="0" y="150" width="100" height="72" rx="10"/><text x="50" y="182" text-anchor="middle">UE</text><text class="sub" x="50" y="206" text-anchor="middle">móvil + USIM</text></g>
+          <g class="caja"><rect x="140" y="150" width="130" height="72" rx="10"/><text x="205" y="182" text-anchor="middle">Node B</text><text class="sub" x="205" y="206" text-anchor="middle">radio WCDMA</text></g>
+          <g class="caja"><rect x="320" y="150" width="130" height="72" rx="10"/><text x="385" y="182" text-anchor="middle">RNC</text><text class="sub" x="385" y="206" text-anchor="middle">controla Node B</text></g>
+        </g>
+        <g data-paso="2">
+          <g class="subsistema"><rect x="490" y="40" width="370" height="420" rx="14"/><text x="505" y="448">Red central (CN, <tspan font-style="italic">Core Network</tspan>)</text></g>
+          <path class="enlace" d="M450,168 L510,106"/>
+          <text class="interfaz" x="470" y="100" text-anchor="middle">Iu-CS</text>
+          <line class="enlace" x1="660" y1="106" x2="690" y2="106"/>
+          <line class="enlace" x1="840" y1="106" x2="880" y2="106"/>
+          <g class="caja"><rect x="510" y="70" width="150" height="72" rx="10"/><text x="585" y="102" text-anchor="middle">MSC / VLR</text><text class="sub" x="585" y="126" text-anchor="middle">circuitos: voz</text></g>
+          <g class="caja"><rect x="690" y="70" width="150" height="72" rx="10"/><text x="765" y="102" text-anchor="middle">GMSC</text><text class="sub" x="765" y="126" text-anchor="middle">pasarela</text></g>
+          <g class="externo"><rect x="880" y="78" width="115" height="56" rx="10"/><text x="937" y="113" text-anchor="middle">PSTN</text></g>
+        </g>
+        <g data-paso="3">
+          <path class="enlace" d="M450,206 L510,251"/>
+          <text class="interfaz" x="478" y="280" text-anchor="middle">Iu-PS</text>
+          <line class="enlace" x1="660" y1="251" x2="690" y2="251"/>
+          <line class="enlace" x1="840" y1="251" x2="880" y2="251"/>
+          <text class="interfaz" x="675" y="240" text-anchor="middle">Gn</text>
+          <text class="interfaz" x="860" y="240" text-anchor="middle">Gi</text>
+          <g class="caja"><rect x="510" y="215" width="150" height="72" rx="10"/><text x="585" y="247" text-anchor="middle">SGSN</text><text class="sub" x="585" y="271" text-anchor="middle">paquetes: datos</text></g>
+          <g class="caja"><rect x="690" y="215" width="150" height="72" rx="10"/><text x="765" y="247" text-anchor="middle">GGSN</text><text class="sub" x="765" y="271" text-anchor="middle">pasarela IP</text></g>
+          <g class="externo"><rect x="880" y="223" width="115" height="56" rx="10"/><text x="937" y="258" text-anchor="middle">Internet</text></g>
+        </g>
+        <g data-paso="4">
+          <path class="enlace" d="M610,287 L640,350"/>
+          <path class="enlace" d="M530,142 C470,240 520,330 600,370"/>
+          <text class="interfaz" x="700" y="330" text-anchor="start">MAP</text>
+          <g class="caja"><rect x="600" y="350" width="170" height="72" rx="10"/><text x="685" y="382" text-anchor="middle">HLR / AuC</text><text class="sub" x="685" y="406" text-anchor="middle">suscriptores y claves</text></g>
+        </g>
+        <g data-paso="5">
+          <line class="enlace" x1="385" y1="222" x2="385" y2="320"/>
+          <text class="interfaz" x="398" y="290">Iur</text>
+          <g class="externo"><rect x="320" y="320" width="130" height="56" rx="10"/><text x="385" y="355" text-anchor="middle">otra RNC</text></g>
+        </g>
+      </svg>
+      <figcaption>Circuitos arriba, paquetes abajo; el HLR/AuC es de los dos. Iur une dos RNC: la necesita un <em>soft handover</em> entre celdas de controladores distintos. En el celular, desliza el mapa hacia los lados.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Le pedimos a la IA que explique la ganancia</h2>
+    <div class="dos-columnas">
+      <div>
+        <p>Le pedimos:</p>
+        <pre class="prompt">Un operador UMTS quiere ofrecer datos a 384 kbit/s además de voz a 12,2 kbit/s. Explica qué es la ganancia de procesamiento de WCDMA, calcúlala para los dos servicios y di cómo cambia la cantidad de usuarios que caben en una celda.</pre>
+      </div>
+      <div>
+        <h3>Para interpretar su respuesta</h3>
+        <ul>
+          <li data-paso="1">¿De dónde sale cada número? ¿Qué cantidad está fija?</li>
+          <li data-paso="2">¿Qué significa que la señal pueda estar por debajo de la interferencia?</li>
+          <li data-paso="3">¿Qué limita la cantidad de usuarios: los códigos o la interferencia?</li>
+          <li data-paso="4">Si un usuario sube su potencia, ¿a quién afecta?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que respondió, leído con la teoría</h2>
+    <div class="dos-columnas caso-ia">
+      <pre class="prompt respuesta-ia">1. La ganancia de procesamiento es la tasa de chips dividida para la tasa de bits.
+2. Voz: 3,84 M / 12,2 k ≈ 315 (25 dB). Datos: 3,84 M / 384 k = 10 (10 dB).
+3. Si el receptor necesita Eb/No = 5 dB, la voz funciona con una señal 20 dB por debajo de la interferencia.
+4. Como cada usuario tiene su propio código OVSF y los códigos son ortogonales, la celda soporta los mismos usuarios con cualquier tasa: solo cambia cuántos datos recibe cada uno.
+5. Si hace falta, el operador sube la potencia del usuario de 384 kbit/s.</pre>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Pasos 1–2:</strong> bien. La tasa de <em>chips</em> es fija; cambia la tasa de bits.</span></li>
+        <li data-paso="2"><span><strong>Paso 3:</strong> bien, y es lo central: al desensanchar, la señal se concentra y la interferencia queda esparcida.</span></li>
+        <li data-paso="3"><span><strong>Paso 4:</strong> falso. Entre celdas y con multitrayecto no hay ortogonalidad: limita la interferencia. Caben unos 65 usuarios de voz, pero solo 3 de 384 kbit/s.</span></li>
+        <li data-paso="4"><span><strong>Paso 5:</strong> más potencia para uno es más interferencia para todos. UMTS ajusta la potencia de cada móvil 1500 veces por segundo.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La carga achica la celda</h2>
+    <div class="dos-columnas grafico-ancho">
+      <figure class="arq">
+        <svg viewBox="0 0 420 400" role="img" aria-label="Radio de una celda WCDMA según la carga, con exponente de pérdidas 3,5: 100 % del radio sin carga, 82 % al 50 %, 67 % al 75 % y 52 % al 90 %.">
+          <circle class="circulo base" cx="210" cy="200" r="180"/>
+          <text class="rot" x="210" y="14" text-anchor="middle">sin carga: radio 100 %</text>
+          <g data-paso="1"><circle class="circulo" cx="210" cy="200" r="147.6"/><text class="rot" x="210" y="46" text-anchor="middle">50 %: 82 %</text></g>
+          <g data-paso="2"><circle class="circulo" cx="210" cy="200" r="121.1"/><text class="rot" x="210" y="73" text-anchor="middle">75 %: 67 %</text></g>
+          <g data-paso="3"><circle class="circulo" cx="210" cy="200" r="93.2"/><text class="rot" x="210" y="101" text-anchor="middle">90 %: 52 %</text></g>
+          <path d="M210,188 l-12,24 h24 z" fill="var(--caja-diagrama)"/>
+        </svg>
+        <figcaption>A escala, con un exponente de pérdidas de 3,5.</figcaption>
+      </figure>
+      <div>
+        <table class="tabla">
+          <thead><tr><th>Carga</th><th>El ruido sube</th><th>Radio</th></tr></thead>
+          <tbody>
+            <tr><td>0 %</td><td>0 dB</td><td class="resultado">× 1,00</td></tr>
+            <tr data-paso="1"><td>50 %</td><td>3,0 dB</td><td class="resultado">× 0,82</td></tr>
+            <tr data-paso="2"><td>75 %</td><td>6,0 dB</td><td class="resultado">× 0,67</td></tr>
+            <tr data-paso="3"><td>90 %</td><td>10,0 dB</td><td class="resultado">× 0,52</td></tr>
+          </tbody>
+        </table>
+        <p class="nota" data-paso="4">El ruido sube 10·log<sub>10</sub>(1 / (1 − carga)) dB. El móvil del borde ya no alcanza la calidad y queda fuera: la celda «respira». Con frecuencias distintas, como en GSM, no pasa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 3 · CLÍNICA ============ -->
+
+  <section class="diapositiva bloque" data-bloque="3">
+    <span class="numero">3</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Cómo reparte WCDMA la celda con códigos. Luego cada uno calcula la ganancia y la capacidad de su servicio y lo revisamos en pantalla compartida.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Códigos OVSF: una tasa para cada usuario</h2>
+    <div class="dos-columnas grafico-ancho">
+      <figure class="arq">
+        <svg viewBox="0 0 560 380" role="img" aria-label="Árbol de códigos OVSF hasta SF 4. Si un usuario usa el código C(2,1), sus hijos C(4,2) y C(4,3) quedan bloqueados.">
+          <path class="enlace" d="M90,190 L190,100 M90,190 L190,280 M260,100 L330,50 M260,100 L330,145 M260,280 L330,235 M260,280 L330,330"/>
+          <g class="caja"><rect x="20" y="165" width="70" height="50" rx="8"/><text x="55" y="198" text-anchor="middle">C1,0</text></g>
+          <g class="caja"><rect x="190" y="75" width="70" height="50" rx="8"/><text x="225" y="108" text-anchor="middle">C2,0</text></g>
+          <g class="caja"><rect x="190" y="255" width="70" height="50" rx="8"/><text x="225" y="288" text-anchor="middle">C2,1</text></g>
+          <g class="caja"><rect x="330" y="27" width="70" height="46" rx="8"/><text x="365" y="58" text-anchor="middle">C4,0</text></g>
+          <g class="caja"><rect x="330" y="122" width="70" height="46" rx="8"/><text x="365" y="153" text-anchor="middle">C4,1</text></g>
+          <g class="caja"><rect x="330" y="212" width="70" height="46" rx="8"/><text x="365" y="243" text-anchor="middle">C4,2</text></g>
+          <g class="caja"><rect x="330" y="307" width="70" height="46" rx="8"/><text x="365" y="338" text-anchor="middle">C4,3</text></g>
+          <text class="codigo" x="410" y="56">+ + + +</text>
+          <text class="codigo" x="410" y="151">+ + − −</text>
+          <text class="codigo" x="410" y="241">+ − + −</text>
+          <text class="codigo" x="410" y="336">+ − − +</text>
+          <text class="rot" x="20" y="370">SF 1</text><text class="rot" x="200" y="370">SF 2</text><text class="rot" x="340" y="370">SF 4</text>
+          <g data-paso="3">
+            <g class="usado"><rect x="190" y="255" width="70" height="50" rx="8"/><text x="225" y="288" text-anchor="middle" style="font-size: 22px; font-weight: 800">C2,1</text></g>
+            <g class="bloqueado"><rect x="330" y="212" width="70" height="46" rx="8"/><text x="365" y="243" text-anchor="middle" style="font-size: 22px; font-weight: 800">C4,2</text></g>
+            <g class="bloqueado"><rect x="330" y="307" width="70" height="46" rx="8"/><text x="365" y="338" text-anchor="middle" style="font-size: 22px; font-weight: 800">C4,3</text></g>
+          </g>
+        </svg>
+      </figure>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>SF</strong> (factor de ensanchamiento) = <em>chips</em> por símbolo. Con 3,84 Mchip/s fijos, un canal de SF 4 lleva 960 ksímbolos/s y uno de SF 256, 15 ksímbolos/s.</span></li>
+        <li data-paso="2"><span>Los códigos de un mismo SF son <strong>ortogonales</strong>: su producto es cero. Así se separan los canales de una celda, cada uno con su tasa.</span></li>
+        <li data-paso="3"><span>Un SF bajo (tasa alta) <strong>bloquea</strong> a sus descendientes: no se pueden usar a la vez.</span></li>
+        <li data-paso="4"><span>Las celdas no se separan con OVSF sino con su <strong>código de aleatorización</strong> (<em>scrambling</em>).</span></li>
+      </ul>
+    </div>
+    <p class="nota">Pruébalo: <code>python ovsf.py</code> (en <code>semana-02/ejemplos</code>) construye el árbol hasta SF 8 y comprueba la ortogonalidad.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ensanchar y desensanchar: cómo se separan dos usuarios</h2>
+    <figure id="anim-ensanchado">
+      <figcaption class="solo-lector">A y B transmiten a la vez en la misma frecuencia con códigos ortogonales de 4 chips. El receptor de A multiplica la suma por el código de A y suma 4 chips por bit: recupera los bits de A y la parte de B suma cero. <span data-paso="1"></span><span data-paso="2"></span><span data-paso="3"></span><span data-paso="4"></span><span data-paso="5"></span><span data-paso="6"></span><span data-paso="7"></span></figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ejemplo resuelto: un servicio de 144 kbit/s</h2>
+    <table class="tabla">
+      <thead><tr><th>Paso</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Ganancia de procesamiento</td><td>3,84 Mchip/s / 144 kbit/s</td><td class="resultado">26,7 = 14,3 dB</td></tr>
+        <tr data-paso="2"><td>C/I requerida (Eb/No = 5 dB)</td><td>5 dB − 14,3 dB</td><td class="resultado">−9,3 dB</td></tr>
+        <tr data-paso="3"><td>Usuarios, celda aislada</td><td>1 + 26,7 / 3,16 (5 dB en lineal)</td><td class="resultado">9,4</td></tr>
+        <tr data-paso="4"><td>Usuarios con otras celdas (i = 0,55)</td><td>1 + 26,7 / (3,16 × 1,55)</td><td class="resultado">6,4 → 6</td></tr>
+        <tr data-paso="5"><td>Con la celda al 50 %</td><td>el ruido sube 3,0 dB</td><td class="resultado">radio × 0,82</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="5">Supuestos de clase: capacidad del enlace ascendente con la celda al 100 % (límite teórico), todos con el mismo servicio, transmisión continua y exponente de pérdidas 3,5. i es la interferencia de las otras celdas relativa a la propia.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Consigna: la capacidad de tu servicio</h2>
+    <p>Tu servicio, según el último dígito de tu cédula: <strong>0–1</strong> 12,2 kbit/s · <strong>2–3</strong> 32 kbit/s · <strong>4–5</strong> 64 kbit/s · <strong>6–7</strong> 128 kbit/s · <strong>8–9</strong> 384 kbit/s. Eb/No = 5 dB, i = 0,55.</p>
+    <ol>
+      <li>Calcula la ganancia de procesamiento (Gp), en veces y en dB.</li>
+      <li>Calcula la C/I requerida: 5 dB − Gp en dB. ¿Qué significa que sea negativa?</li>
+      <li>¿Cuántos usuarios de tu servicio caben con otras celdas alrededor? Usa 1 + Gp / (3,16 × 1,55).</li>
+      <li>Interpreta a la IA: «con códigos ortogonales caben los mismos usuarios con cualquier tasa». ¿Qué supuso? Extra: ¿y con la celda al 75 % de carga?</li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Comprueba con <code>python ganancia.py &lt;kbit/s&gt;</code> (en <code>semana-02/ejemplos</code>). ¿Quieres mostrar tu resultado? Avísame por chat.</p>
+      <button class="temporizador" type="button" data-minutos="20" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 4 · EJERCICIO APLICADO ============ -->
+
+  <section class="diapositiva bloque" data-bloque="4">
+    <span class="numero">4</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Un usuario va de una celda a otra durante una llamada. Seguimos sus mediciones segundo a segundo, con las reglas de UMTS y con las de GSM.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2><em>Soft handover</em> frente a <em>hard handover</em></h2>
+    <div class="dos-columnas">
+      <div>
+        <h3><em>Soft</em> (UMTS, misma frecuencia)</h3>
+        <ul class="ideas compactas">
+          <li data-paso="1"><span>El móvil se comunica a la vez con las celdas de su <strong>conjunto activo</strong> (<em>active set</em>), por lo general hasta 3.</span></li>
+          <li data-paso="2"><span>Subida: la RNC se queda con la mejor trama. Bajada: el móvil combina las señales. Entre dos sectores del mismo Node B se llama <em>softer handover</em>.</span></li>
+          <li data-paso="3"><span>No hay corte. El costo: ocupa recursos en varias celdas a la vez.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3><em>Hard</em> (GSM, o UMTS entre frecuencias)</h3>
+        <ul class="ideas compactas">
+          <li data-paso="4"><span>Suelta una celda y toma otra: hay un corte breve.</span></li>
+          <li data-paso="5"><span>UMTS lo usa al cambiar de frecuencia o de sistema (por ejemplo, a GSM). Para medir otra frecuencia, abre huecos en su transmisión: el <strong>modo comprimido</strong>.</span></li>
+          <li data-paso="6"><span>El móvil mide el canal piloto (CPICH): <strong>RSCP</strong> (<em>Received Signal Code Power</em>), su potencia, y <strong>Ec/No</strong> = RSCP / potencia total recibida.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Las mediciones del recorrido</h2>
+    <div class="dos-columnas">
+      <table class="tabla">
+        <thead><tr><th>Segundo</th><th>Celda A</th><th>Celda B</th><th>Celda C</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>−6</td><td>−14</td><td>−20</td></tr>
+          <tr><td>1</td><td>−7</td><td>−11</td><td>−19</td></tr>
+          <tr><td>2</td><td>−8</td><td>−9</td><td>−17</td></tr>
+          <tr><td>3</td><td>−9</td><td>−8</td><td>−15</td></tr>
+          <tr><td>4</td><td>−11</td><td>−7</td><td>−12</td></tr>
+          <tr><td>5</td><td>−13</td><td>−7</td><td>−9</td></tr>
+          <tr><td>6</td><td>−15</td><td>−8</td><td>−7</td></tr>
+          <tr><td>7</td><td>−17</td><td>−10</td><td>−6</td></tr>
+          <tr><td>8</td><td>−19</td><td>−13</td><td>−6</td></tr>
+        </tbody>
+      </table>
+      <div>
+        <h3>Reglas de este ejercicio</h3>
+        <ul>
+          <li>Ec/No del CPICH en dB. El usuario empieza conectado solo a A.</li>
+          <li><strong><em>Soft</em>:</strong> una celda entra al conjunto activo si está a 3 dB o menos de la mejor; sale si queda a más de 5 dB de la mejor. Máximo 3.</li>
+          <li><strong><em>Hard</em>:</strong> una sola celda; cambia cuando una vecina la supera por 3 dB o más.</li>
+        </ul>
+        <p class="nota">Las ventanas de entrada y salida son distintas a propósito: así una celda no entra y sale a cada rato.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Consigna: sigue al usuario</h2>
+    <ol>
+      <li>Escribe el conjunto activo en cada segundo. ¿Cuándo entra y cuándo sale cada celda?</li>
+      <li>Haz lo mismo con las reglas de <em>hard handover</em>. ¿En qué segundos hay un corte?</li>
+      <li>En el segundo 3, ¿con qué celda habla cada versión del móvil? ¿Cuál era la mejor?</li>
+      <li>¿Por qué UMTS puede hacer <em>soft handover</em> y GSM no?</li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Comprueba con <code>python soft_handover.py</code> (en <code>semana-02/ejemplos</code>).</p>
+      <button class="temporizador" type="button" data-minutos="15" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Solución, segundo a segundo</h2>
+    <table class="tabla">
+      <thead><tr><th>Segundo</th><th><em>Soft</em>: conjunto activo</th><th>Qué pasó</th><th><em>Hard</em>: celda</th><th>Qué pasó</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>0–1</td><td class="resultado">A</td><td>B está lejos de la mejor</td><td class="resultado">A</td><td>—</td></tr>
+        <tr data-paso="2"><td>2</td><td class="resultado">A + B</td><td>entra B (a 1 dB)</td><td class="resultado">A</td><td>—</td></tr>
+        <tr data-paso="3"><td>3</td><td class="resultado">A + B</td><td>B ya es la mejor</td><td class="resultado">A</td><td>sigue en A, que es peor</td></tr>
+        <tr data-paso="4"><td>4</td><td class="resultado">A + B</td><td>A sigue a 4 dB</td><td class="resultado">B</td><td><strong>corte</strong> A → B</td></tr>
+        <tr data-paso="5"><td>5</td><td class="resultado">B + C</td><td>sale A, entra C</td><td class="resultado">B</td><td>—</td></tr>
+        <tr data-paso="6"><td>6–7</td><td class="resultado">B + C</td><td>B sigue cerca</td><td class="resultado">C en el 7</td><td><strong>corte</strong> B → C</td></tr>
+        <tr data-paso="7"><td>8</td><td class="resultado">C</td><td>sale B (a 7 dB)</td><td class="resultado">C</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="8">El <em>soft handover</em> no corta nunca: siempre hay al menos una celda. GSM no puede hacerlo porque sus celdas vecinas usan frecuencias distintas; en WCDMA todas usan la misma.</p>
+  </section>
+
+  <!-- ============ BLOQUE 5 · CIERRE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="5">
+    <span class="numero">5</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Canales, estados y seguridad: repaso para el domingo.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Canales físicos: quién dice qué</h2>
+    <table class="tabla">
+      <thead><tr><th>Canal</th><th>Para qué</th></tr></thead>
+      <tbody>
+        <tr><td><code>P-SCH · S-SCH</code></td><td>sincronización primaria y secundaria: el móvil encuentra la celda y su temporización</td></tr>
+        <tr><td><code>CPICH</code></td><td>piloto común: el móvil mide RSCP y Ec/No de cada celda para elegirla y para el <em>handover</em></td></tr>
+        <tr><td><code>P-CCPCH</code></td><td>control común primario: difunde la información del sistema (BCH): la red, la celda, las vecinas</td></tr>
+        <tr><td><code>PICH · S-CCPCH</code></td><td>el PICH avisa cuándo mirar; el S-CCPCH lleva el PCH (avisos de llamada) y el FACH (datos cortos)</td></tr>
+        <tr><td><code>PRACH</code></td><td>acceso aleatorio: el móvil pide entrar a la red (RACH)</td></tr>
+        <tr><td><code>DPCH</code></td><td>canal dedicado de una llamada: datos y control de potencia</td></tr>
+        <tr><td><code>HS-PDSCH</code></td><td>canal compartido de HSDPA: el Node B lo reparte cada 2 ms</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Estados: en reposo o conectado</h2>
+    <table class="tabla">
+      <thead><tr><th>Estado</th><th>Circuitos (MM, gestión de movilidad, con el MSC)</th><th>Paquetes (PMM, con el SGSN)</th></tr></thead>
+      <tbody>
+        <tr><td><code>Detached</code></td><td>apagado o sin registrarse</td><td>sin registrarse para datos</td></tr>
+        <tr><td><code>Idle</code></td><td>registrado y listo para llamar o recibir, sin conexión: vigila los avisos de llamada (PCH)</td><td>registrado; puede conservar su contexto PDP (su sesión de datos) y su IP, pero sin conexión activa</td></tr>
+        <tr><td><code>Connected</code></td><td>llamada en curso</td><td>conexión de señalización activa con el SGSN, con su contexto PDP y su IP</td></tr>
+      </tbody>
+    </table>
+    <p class="nota">En la radio, la conexión RRC con la RNC tiene sus propios estados: Idle, y conectado en CELL_DCH (canal dedicado), CELL_FACH (canales comunes, poco tráfico) o CELL_PCH y URA_PCH (solo escucha avisos).</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Seguridad: lo que GSM no tenía</h2>
+    <div class="dos-columnas">
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Autenticación mutua:</strong> junto con el RAND, la red envía un AUTN (testigo de autenticación) que prueba que conoce la clave K. El móvil rechaza una estación base falsa.</span></li>
+        <li data-paso="2"><span><strong>Dos claves de 128 bits:</strong> CK para cifrar e <strong>IK para la integridad</strong>. Con IK, cada mensaje de señalización lleva un código que delata cualquier alteración.</span></li>
+        <li data-paso="3"><span>El cifrado llega hasta la RNC, no solo hasta la estación base.</span></li>
+      </ul>
+      <table class="tabla">
+        <thead><tr><th></th><th>GSM</th><th>UMTS</th></tr></thead>
+        <tbody>
+          <tr><td>Vector</td><td>RAND, SRES, Kc</td><td>RAND, XRES, CK, IK, AUTN</td></tr>
+          <tr><td>¿Quién se autentica?</td><td>el móvil</td><td>los dos</td></tr>
+          <tr><td>Integridad</td><td>no</td><td>sí, con IK</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>UMTS evoluciona: los <em>releases</em> (versiones) de 3GPP</h2>
+    <table class="tabla">
+      <thead><tr><th><em>Release</em></th><th>Qué trajo</th></tr></thead>
+      <tbody>
+        <tr><td><code>R99</code></td><td>UMTS con WCDMA</td></tr>
+        <tr><td><code>Rel-4 · Rel-5</code></td><td>red central de circuitos sobre IP · IMS y HSDPA</td></tr>
+        <tr><td><code>Rel-6 · Rel-7</code></td><td>HSUPA (subida rápida) · HSPA+ (MIMO y 64QAM)</td></tr>
+        <tr><td><code>Rel-8</code></td><td>LTE (<em>Long Term Evolution</em>), la base del 4G: OFDMA en la bajada y SC-FDMA en la subida. En HSPA, dos portadoras adyacentes (DC-HSDPA).</td></tr>
+        <tr><td><code>Rel-9</code></td><td>DC-HSDPA en dos bandas no adyacentes, por ejemplo 900 MHz + 2100 MHz</td></tr>
+      </tbody>
+    </table>
+    <p class="nota"><strong>HSDPA</strong> acelera la bajada con tres trucos: el Node B decide cada 2 ms a quién transmitir, adapta la modulación al canal y retransmite rápido los bloques con error (HARQ, en la capa MAC), combinando cada intento con los anteriores.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Si quieres ir más allá</h2>
+    <table class="tabla">
+      <thead><tr><th>Si te interesa…</th><th>Busca</th></tr></thead>
+      <tbody>
+        <tr><td>Por qué un móvil cercano puede tapar a uno lejano</td><td><em>near-far problem</em> · <em>WCDMA closed-loop power control</em></td></tr>
+        <tr><td>Cómo se aprovechan los ecos de la señal</td><td><em>RAKE receiver</em></td></tr>
+        <tr><td>Cómo se distinguen las celdas</td><td><em>WCDMA scrambling codes</em></td></tr>
+        <tr><td>Cuántos usuarios caben de verdad</td><td><em>WCDMA uplink load factor</em> · <em>pole capacity</em></td></tr>
+        <tr><td>La seguridad de 3G y sus límites</td><td><em>UMTS AKA</em> · <em>MILENAGE</em> · <em>downgrade attack 2G</em></td></tr>
+      </tbody>
+    </table>
+    <p class="nota">Nada de esto entra en el cuestionario: es para quien quiera profundizar.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo usar el tutor</h2>
+    <ol>
+      <li>Abre el sitio del curso y pulsa <strong>Copiar tutor</strong> en la semana 3. También puedes <a href="../ver.html?f=semana-03/tutor.md">abrirlo aquí</a>.</li>
+      <li>Pégalo completo en ChatGPT, Gemini o Claude (sirve la versión gratuita).</li>
+      <li>Conversa 20–30 minutos. Te hará preguntas y no te dará respuestas.</li>
+      <li>Al final, envía tu ticket de entrada en el <a href="https://forms.cloud.microsoft/r/h4WBZUxVVN">formulario de tickets</a> hasta las 12:00 del martes 10 de noviembre.</li>
+    </ol>
+    <p class="nota">Si tienes poco tiempo, escribe RÁPIDO al empezar: irá directo a las preguntas de control.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Antes de irnos</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Este domingo, 8 nov</span><span>Aprendizaje Práctico de la semana 2.</span></li>
+      <li><span class="que">Entrega en curso</span><span>Aprendizaje Autónomo 1, el informe sobre GSM: vence el domingo 15 de noviembre. <a href="../ver.html?f=entregas/aa1.md">Guía y rúbrica</a>.</span></li>
+      <li><span class="que">Si ves la grabación</span><span>Resuelve la consigna del bloque 3 con tu servicio y compruébala con <code>ganancia.py</code>. Luego completa la tabla del recorrido (bloque 4) y explica en dos líneas por qué el <em>soft handover</em> no corta.</span></li>
+      <li><span class="que">Próxima semana</span><span>LTE. Antes de la sesión, usa el <a href="../ver.html?f=semana-03/tutor.md">tutor de la semana 3</a>.</span></li>
+    </ul>
+  </section>
+
+</main>
+<script src="../assets/secuencia.js"></script>
+<script src="../assets/presentacion.js"></script>
+<script src="anim-ensanchado.js"></script>
+</body>
+</html>
