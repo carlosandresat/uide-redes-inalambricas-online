@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamentos de Redes Inalámbricas · Semana 3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Overpass:wght@400;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="../assets/presentacion.css">
+  <script src="../assets/tema.js"></script>
+  <style>
+    /* Mapa del EPC */
+    .arq svg { width: 100%; height: auto; max-height: calc(var(--u) * 60); display: block; font-family: var(--f-texto); }
+    .arq .caja rect { fill: var(--caja-diagrama); }
+    .arq .caja text { fill: var(--texto-caja-diagrama); font-size: 22px; font-weight: 800; }
+    .arq .caja text.sub { font-size: 15px; font-weight: 600; }
+    .arq .externo rect { fill: none; stroke: var(--caja-diagrama); stroke-width: 3; }
+    .arq .externo text { fill: var(--tinta); font-size: 19px; font-weight: 800; }
+    .arq .enlace { stroke: var(--acento); stroke-width: 4; fill: none; }
+    .arq .enlace.control { stroke-dasharray: 9 7; stroke-width: 3; }
+    .arq .enlace.radio { stroke-dasharray: 3 6; }
+    .arq .interfaz { fill: var(--acento); font-family: var(--f-codigo); font-size: 17px; font-weight: 600; }
+    .arq .subsistema rect { fill: none; stroke: var(--tinta-suave); stroke-width: 2; stroke-dasharray: 8 6; }
+    .arq .subsistema text { fill: var(--tinta-suave); font-size: 18px; font-weight: 800; }
+    .lectura .arq { overflow-x: auto; }
+    .lectura .arq.ancho svg { min-width: 680px; }
+    /* Cuadrícula de recursos */
+    .rejilla svg { width: 100%; height: auto; max-height: calc(var(--u) * 58); display: block; font-family: var(--f-texto); }
+    .rejilla .re-datos rect { fill: var(--caja-diagrama); opacity: 0.22; }
+    .rejilla .re-control rect { fill: var(--tinta-suave); opacity: 0.55; }
+    .rejilla .re-ref rect { fill: var(--acento); }
+    .rejilla .linea { stroke: var(--regla); stroke-width: 1.5; }
+    .rejilla .ranura { stroke: var(--tinta); stroke-width: 3; }
+    .rejilla .rot { fill: var(--tinta-suave); font-size: 15px; }
+    .rejilla .cota { stroke: var(--tinta-suave); stroke-width: 2; fill: none; }
+    .muestra { display: inline-block; width: 1em; height: 0.8em; vertical-align: -0.05em; margin-right: 0.3em; }
+    .presentacion .respuesta-ia { font-size: calc(var(--u) * 2.5); }
+    .presentacion .caso-ia { grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 4); }
+    .presentacion .caso-ia .ideas.compactas li { font-size: calc(var(--u) * 3.2); }
+    .presentacion .grafico-ancho { grid-template-columns: 1.25fr 1fr; gap: calc(var(--u) * 4); }
+    .presentacion .tabla.apretada { font-size: calc(var(--u) * 2.9); }
+    .presentacion .tabla.apretada td { padding-top: calc(var(--u) * 0.7); padding-bottom: calc(var(--u) * 0.7); }
+  </style>
+</head>
+<body data-curso="redes-inalambricas" data-formato="clinica" data-bloque4="Ejercicio aplicado">
+<div class="barra-lectura">
+  <a href="../index.html">Volver al curso</a>
+  <button type="button" class="boton" data-alternar-tema>Modo oscuro</button>
+</div>
+<main class="escenario">
+
+  <section class="diapositiva portada">
+    <div class="portada-panel">
+      <span>Semana</span>
+      <span class="semana-numero">3</span>
+      <span>de 7</span>
+    </div>
+    <div class="portada-texto">
+      <p class="curso">Fundamentos de Redes Inalámbricas</p>
+      <h1>LTE</h1>
+      <p class="objetivo">Ubicar cada componente del núcleo LTE, entender cómo OFDM reparte el espectro en bloques de recursos y calcular de dónde sale la velocidad que promete un operador, y hasta dónde llega su celda.</p>
+      <p class="fecha">Martes 10 de noviembre · 19:00</p>
+      <div class="recorrido-completo"></div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Plan de hoy</h2>
+    <ol class="plan">
+      <li data-bloque="1">Pista para el Aprendizaje Práctico, tres ideas y una pregunta rápida.</li>
+      <li data-bloque="2">El mapa del núcleo LTE y cómo se conecta un celular. Le pedimos a la IA la velocidad máxima de LTE y la revisamos factor por factor.</li>
+      <li data-bloque="3">Cada uno calcula la velocidad de su propia portadora. Lo revisamos en pantalla compartida.</li>
+      <li data-bloque="4">Balance de enlace: qué representa cada margen y hasta dónde llega una celda.</li>
+      <li data-bloque="5">Canales y pila de protocolos para el domingo, el Aprendizaje Autónomo 1 y el tutor de la próxima semana.</li>
+    </ol>
+  </section>
+
+  <!-- ============ BLOQUE 1 · PUENTE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="1">
+    <span class="numero">1</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Para el Aprendizaje Práctico de este domingo</h2>
+    <p class="pista">Para cada componente del núcleo, pregúntate qué hace: ¿señalización y movilidad, datos del usuario, direcciones IP, suscriptores o políticas? Para cada canal: ¿sube o baja, y lleva datos o control? Y para cada protocolo de la pila: ¿cifra, retransmite o configura?</p>
+    <p class="nota">Una pista, no la pregunta. El cuestionario vence el domingo 15 de noviembre, el mismo día que el Aprendizaje Autónomo 1.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tres ideas para llevarse</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span>LTE es <strong>todo IP</strong>. El <strong>eNodeB</strong> hace la radio y el control que antes hacía la RNC. El núcleo (EPC) separa la señalización (<strong>MME</strong>) de los datos (<strong>S-GW</strong> y <strong>PDN-GW</strong>), con el <strong>HSS</strong> para los suscriptores y el <strong>PCRF</strong> para las políticas.</span></li>
+      <li data-paso="2"><span>Su radio es <strong>OFDM</strong>: muchas subportadoras ortogonales de 15 kHz. En la bajada se reparte con <strong>OFDMA</strong>; en la subida, con <strong>SC-FDMA</strong>, que ahorra batería. Usa portadoras de hasta <strong>20 MHz</strong> y <strong>MIMO</strong> para enviar varios flujos a la vez.</span></li>
+      <li data-paso="3"><span>Cada capa de la pila tiene su tarea: <strong>PDCP</strong> cifra y comprime cabeceras, <strong>RLC</strong> segmenta, <strong>MAC</strong> reparte y retransmite rápido (<strong>HARQ</strong>), <strong>RRC</strong> configura la conexión. En reposo y con <strong>DRX</strong>, el móvil ahorra energía.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Si vienes de UMTS</h2>
+    <table class="tabla">
+      <thead><tr><th>Aspecto</th><th>UMTS (semana 2)</th><th>LTE (hoy)</th></tr></thead>
+      <tbody>
+        <tr><td>Acceso radio</td><td>Node B + RNC</td><td>solo eNodeB, conectados entre sí por X2</td></tr>
+        <tr><td>Núcleo</td><td>circuitos (MSC) y paquetes (SGSN, GGSN)</td><td>solo paquetes: MME (control), S-GW y PDN-GW (datos)</td></tr>
+        <tr><td>Radio</td><td>WCDMA, canales de 5 MHz</td><td>OFDMA abajo, SC-FDMA arriba; de 1,4 a 20 MHz</td></tr>
+        <tr><td><em>Handover</em></td><td><em>soft</em>, varias celdas a la vez</td><td><em>hard</em>, coordinado entre eNodeB por X2</td></tr>
+        <tr><td>Retransmisión rápida</td><td>HARQ en HSDPA, cada 2 ms</td><td>HARQ en la capa MAC, cada 1 ms</td></tr>
+        <tr><td>Base de suscriptores</td><td>HLR</td><td>HSS</td></tr>
+        <tr><td>Estados de la radio</td><td>Idle, CELL_DCH, CELL_FACH…</td><td>RRC Idle y RRC Connected</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva pregunta">
+    <p class="nota">Responde en el Forms del chat de la reunión</p>
+    <p class="enunciado">Un bloque de recursos de LTE tiene 12 subportadoras de 15 kHz. ¿Cuántos usa una portadora de 10 MHz?</p>
+    <ol class="opciones">
+      <li>50</li>
+      <li>55</li>
+      <li>66</li>
+      <li>666</li>
+    </ol>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Por qué son 50 y no 55</h2>
+    <div class="dos-columnas">
+      <div>
+        <ul class="ideas compactas">
+          <li data-paso="1"><span>Un bloque mide 12 × 15 kHz = <strong>180 kHz</strong>. La división da 10 MHz / 180 kHz = 55,6.</span></li>
+          <li data-paso="2"><span>Pero LTE ocupa cerca del <strong>90 %</strong> del canal: el resto es banda de guarda para no interferir al vecino. 50 × 180 kHz = 9 MHz.</span></li>
+          <li data-paso="3"><span>Respuesta: <mark>50 bloques</mark>. 666 sale de olvidar los 12 por bloque (10 MHz / 15 kHz).</span></li>
+        </ul>
+      </div>
+      <table class="tabla" data-paso="2">
+        <thead><tr><th>Canal</th><th>Bloques</th><th>Ocupa</th></tr></thead>
+        <tbody>
+          <tr><td>1,4 MHz</td><td class="resultado">6</td><td>1,08 MHz</td></tr>
+          <tr><td>3 MHz</td><td class="resultado">15</td><td>2,7 MHz</td></tr>
+          <tr><td>5 MHz</td><td class="resultado">25</td><td>4,5 MHz</td></tr>
+          <tr><td>10 MHz</td><td class="resultado">50</td><td>9 MHz</td></tr>
+          <tr><td>15 MHz</td><td class="resultado">75</td><td>13,5 MHz</td></tr>
+          <tr><td>20 MHz</td><td class="resultado">100</td><td>18 MHz</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota" data-paso="3">20 MHz es el máximo de una portadora. LTE-Advanced suma hasta 5 portadoras (agregación de portadoras): hasta 100 MHz en total.</p>
+  </section>
+
+  <!-- ============ BLOQUE 2 · CASO EN VIVO ============ -->
+
+  <section class="diapositiva bloque" data-bloque="2">
+    <span class="numero">2</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Primero el mapa del núcleo y cómo se conecta un celular. Después le pedimos a la IA la velocidad máxima de LTE y la revisamos factor por factor.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El mapa de LTE</h2>
+    <figure class="arq ancho">
+      <svg viewBox="0 0 1000 440" role="img" aria-label="Arquitectura LTE: el móvil se conecta por radio al eNodeB; los eNodeB se unen por X2. El eNodeB se conecta al MME por S1-MME (señalización) y al S-GW por S1-U (datos). El MME consulta al HSS por S6a y controla al S-GW por S11. El S-GW se une al PDN-GW por S5, y el PDN-GW sale a Internet por SGi. El PCRF da las políticas al PDN-GW por Gx.">
+        <g data-paso="1">
+          <g class="subsistema"><rect x="116" y="165" width="170" height="262" rx="14"/><text x="128" y="415">E-UTRAN</text></g>
+          <line class="enlace radio" x1="90" y1="226" x2="130" y2="226"/>
+          <line class="enlace" x1="200" y1="262" x2="200" y2="330"/>
+          <text class="interfaz" x="212" y="303">X2</text>
+          <g class="caja"><rect x="0" y="190" width="90" height="72" rx="10"/><text x="45" y="222" text-anchor="middle">UE</text><text class="sub" x="45" y="246" text-anchor="middle">móvil</text></g>
+          <g class="caja"><rect x="130" y="190" width="140" height="72" rx="10"/><text x="200" y="222" text-anchor="middle">eNodeB</text><text class="sub" x="200" y="246" text-anchor="middle">radio y su control</text></g>
+          <g class="externo"><rect x="130" y="330" width="140" height="56" rx="10"/><text x="200" y="365" text-anchor="middle">otro eNodeB</text></g>
+        </g>
+        <g data-paso="2">
+          <g class="subsistema"><rect x="350" y="35" width="440" height="320" rx="14"/><text x="365" y="343">EPC · núcleo de paquetes</text></g>
+          <path class="enlace control" d="M270,206 L380,100"/>
+          <text class="interfaz" x="300" y="140" text-anchor="middle">S1-MME</text>
+          <line class="enlace control" x1="520" y1="96" x2="600" y2="96"/>
+          <text class="interfaz" x="560" y="86" text-anchor="middle">S6a</text>
+          <g class="caja"><rect x="380" y="60" width="140" height="72" rx="10"/><text x="450" y="92" text-anchor="middle">MME</text><text class="sub" x="450" y="116" text-anchor="middle">señalización</text></g>
+          <g class="caja"><rect x="600" y="60" width="150" height="72" rx="10"/><text x="675" y="92" text-anchor="middle">HSS</text><text class="sub" x="675" y="116" text-anchor="middle">suscriptores</text></g>
+        </g>
+        <g data-paso="3">
+          <path class="enlace" d="M270,246 L380,286"/>
+          <text class="interfaz" x="318" y="290" text-anchor="middle">S1-U</text>
+          <line class="enlace control" x1="450" y1="132" x2="450" y2="250"/>
+          <text class="interfaz" x="460" y="196">S11</text>
+          <line class="enlace" x1="520" y1="286" x2="600" y2="286"/>
+          <text class="interfaz" x="560" y="276" text-anchor="middle">S5</text>
+          <line class="enlace" x1="750" y1="286" x2="830" y2="286"/>
+          <text class="interfaz" x="808" y="276" text-anchor="middle">SGi</text>
+          <g class="caja"><rect x="380" y="250" width="140" height="72" rx="10"/><text x="450" y="282" text-anchor="middle">S-GW</text><text class="sub" x="450" y="306" text-anchor="middle">ancla de datos</text></g>
+          <g class="caja"><rect x="600" y="250" width="150" height="72" rx="10"/><text x="675" y="282" text-anchor="middle">PDN-GW</text><text class="sub" x="675" y="306" text-anchor="middle">asigna la IP</text></g>
+          <g class="externo"><rect x="830" y="258" width="150" height="56" rx="10"/><text x="905" y="293" text-anchor="middle">Internet</text></g>
+        </g>
+        <g data-paso="4">
+          <line class="enlace control" x1="675" y1="216" x2="675" y2="250"/>
+          <text class="interfaz" x="685" y="240">Gx</text>
+          <g class="caja"><rect x="600" y="156" width="150" height="60" rx="10"/><text x="675" y="185" text-anchor="middle">PCRF</text><text class="sub" x="675" y="206" text-anchor="middle">políticas y QoS</text></g>
+        </g>
+      </svg>
+      <figcaption>Línea discontinua: señalización (plano de control). Línea continua: datos del usuario, en túneles GTP. No hay conmutación de circuitos: la voz irá sobre IP (la próxima semana). En el celular, desliza el mapa.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Así se conecta un celular (<em>attach</em>)</h2>
+    <figure class="secuencia" data-actores="UE, eNodeB, MME, HSS, S-GW / PDN-GW" data-espacio="60">
+      <ol>
+        <li data-de="UE" data-a="eNodeB" data-nota="PRACH: sincroniza la subida">Acceso aleatorio</li>
+        <li data-de="UE" data-a="MME" data-nota="NAS, pasa por el eNodeB">Attach Request</li>
+        <li data-de="MME" data-a="HSS" data-nota="Diameter (S6a)">Pide vectores</li>
+        <li data-de="HSS" data-a="MME" data-tipo="respuesta" data-nota="Diameter">RAND, AUTN, XRES, clave</li>
+        <li data-de="MME" data-a="UE" data-nota="NAS">Desafío: RAND, AUTN</li>
+        <li data-de="UE" data-a="MME" data-tipo="respuesta" data-nota="NAS">Respuesta: RES</li>
+        <li data-de="MME" data-a="UE" data-nota="cifrado e integridad">Activa la seguridad</li>
+        <li data-de="MME" data-a="S-GW / PDN-GW" data-nota="GTP-C (S11 y S5)">Crea la sesión</li>
+        <li data-de="S-GW / PDN-GW" data-a="MME" data-tipo="respuesta" data-nota="la asigna el PDN-GW">IP del UE</li>
+        <li data-de="MME" data-a="eNodeB" data-nota="S1AP">Attach Accept</li>
+        <li data-de="eNodeB" data-a="UE" data-nota="RRC">Portadora por defecto</li>
+      </ol>
+      <figcaption>Al terminar, el celular tiene IP y una portadora por defecto: un túnel GTP del eNodeB al PDN-GW. Los mensajes del UE al MME pasan por el eNodeB; se dibujan directos para leerlos mejor.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Le pedimos a la IA la velocidad de LTE</h2>
+    <div class="dos-columnas">
+      <div>
+        <p>Le pedimos:</p>
+        <pre class="prompt">Calcula la velocidad máxima de bajada de una celda LTE de 20 MHz con 64QAM y MIMO 2×2. Explica de dónde sale cada factor.</pre>
+      </div>
+      <div>
+        <h3>Para interpretar su respuesta</h3>
+        <ul>
+          <li data-paso="1">¿De dónde salen el 100, el 12 y el 14?</li>
+          <li data-paso="2">¿Todos los elementos de recurso llevan datos del usuario?</li>
+          <li data-paso="3">¿Esa velocidad es de la celda o de cada usuario?</li>
+          <li data-paso="4">¿Qué condiciones de radio supone?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que respondió, leído con la teoría</h2>
+    <div class="dos-columnas caso-ia">
+      <pre class="prompt respuesta-ia">1. 20 MHz equivalen a 100 bloques de recursos de 12 subportadoras: 1200 subportadoras.
+2. Cada milisegundo hay 14 símbolos OFDM.
+3. 64QAM lleva 6 bits por símbolo, y MIMO 2×2 transmite 2 flujos.
+4. 1200 × 14 × 1000 × 6 × 2 = 201,6 Mbit/s.
+5. Por lo tanto, cada usuario de la celda puede descargar a 201,6 Mbit/s.</pre>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Pasos 1–3:</strong> bien. 100 bloques ocupan 18 MHz; 14 símbolos por subtrama de 1 ms; 6 bits; 2 capas.</span></li>
+        <li data-paso="2"><span><strong>Paso 4:</strong> cuenta todos los elementos como datos. El control y las señales de referencia se llevan 48 de cada 168: quedan 144 Mbit/s, antes de la codificación.</span></li>
+        <li data-paso="3"><span><strong>Paso 5:</strong> falso. Es un techo para toda la celda: el eNodeB la reparte cada milisegundo. Con 10 usuarios activos, unos 14 Mbit/s cada uno.</span></li>
+        <li data-paso="4"><span><strong>Lo que no dice:</strong> 64QAM y 2 capas exigen señal excelente. En el borde de la celda, el móvil baja a QPSK y a una capa.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 3 · CLÍNICA ============ -->
+
+  <section class="diapositiva bloque" data-bloque="3">
+    <span class="numero">3</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>La cuadrícula de recursos de LTE. Luego cada uno calcula la velocidad de su portadora y lo revisamos en pantalla compartida.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Por qué las subportadoras se solapan sin interferir</h2>
+    <figure id="anim-ofdm">
+      <figcaption class="solo-lector">Cada subportadora OFDM tiene un espectro en forma de sinc con ceros cada 15 kHz. En el centro de una, todas las demás valen cero: son ortogonales. Un desfase de frecuencia rompe esa condición y produce interferencia. <span data-paso="1"></span><span data-paso="2"></span><span data-paso="3"></span><span data-paso="4"></span><span data-paso="5"></span></figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La cuadrícula de recursos</h2>
+    <div class="dos-columnas grafico-ancho">
+      <figure class="rejilla">
+<svg viewBox="0 0 560 345" role="img" aria-label="Cuadrícula de un par de bloques de recursos LTE: 12 subportadoras por 14 símbolos (168 elementos). Los 3 primeros símbolos son de control y 16 elementos llevan señales de referencia de 2 antenas; quedan 120 para datos.">
+<g class="re-datos"><rect x="150" y="254" width="30" height="20"/><rect x="150" y="234" width="30" height="20"/><rect x="150" y="214" width="30" height="20"/><rect x="150" y="194" width="30" height="20"/><rect x="150" y="174" width="30" height="20"/><rect x="150" y="154" width="30" height="20"/><rect x="150" y="134" width="30" height="20"/><rect x="150" y="114" width="30" height="20"/><rect x="150" y="94" width="30" height="20"/><rect x="150" y="74" width="30" height="20"/><rect x="150" y="54" width="30" height="20"/><rect x="150" y="34" width="30" height="20"/><rect x="180" y="234" width="30" height="20"/><rect x="180" y="214" width="30" height="20"/><rect x="180" y="174" width="30" height="20"/><rect x="180" y="154" width="30" height="20"/><rect x="180" y="114" width="30" height="20"/><rect x="180" y="94" width="30" height="20"/><rect x="180" y="54" width="30" height="20"/><rect x="180" y="34" width="30" height="20"/><rect x="210" y="254" width="30" height="20"/><rect x="210" y="234" width="30" height="20"/><rect x="210" y="214" width="30" height="20"/><rect x="210" y="194" width="30" height="20"/><rect x="210" y="174" width="30" height="20"/><rect x="210" y="154" width="30" height="20"/><rect x="210" y="134" width="30" height="20"/><rect x="210" y="114" width="30" height="20"/><rect x="210" y="94" width="30" height="20"/><rect x="210" y="74" width="30" height="20"/><rect x="210" y="54" width="30" height="20"/><rect x="210" y="34" width="30" height="20"/><rect x="240" y="254" width="30" height="20"/><rect x="240" y="234" width="30" height="20"/><rect x="240" y="214" width="30" height="20"/><rect x="240" y="194" width="30" height="20"/><rect x="240" y="174" width="30" height="20"/><rect x="240" y="154" width="30" height="20"/><rect x="240" y="134" width="30" height="20"/><rect x="240" y="114" width="30" height="20"/><rect x="240" y="94" width="30" height="20"/><rect x="240" y="74" width="30" height="20"/><rect x="240" y="54" width="30" height="20"/><rect x="240" y="34" width="30" height="20"/><rect x="270" y="234" width="30" height="20"/><rect x="270" y="214" width="30" height="20"/><rect x="270" y="174" width="30" height="20"/><rect x="270" y="154" width="30" height="20"/><rect x="270" y="114" width="30" height="20"/><rect x="270" y="94" width="30" height="20"/><rect x="270" y="54" width="30" height="20"/><rect x="270" y="34" width="30" height="20"/><rect x="300" y="254" width="30" height="20"/><rect x="300" y="234" width="30" height="20"/><rect x="300" y="214" width="30" height="20"/><rect x="300" y="194" width="30" height="20"/><rect x="300" y="174" width="30" height="20"/><rect x="300" y="154" width="30" height="20"/><rect x="300" y="134" width="30" height="20"/><rect x="300" y="114" width="30" height="20"/><rect x="300" y="94" width="30" height="20"/><rect x="300" y="74" width="30" height="20"/><rect x="300" y="54" width="30" height="20"/><rect x="300" y="34" width="30" height="20"/><rect x="330" y="254" width="30" height="20"/><rect x="330" y="234" width="30" height="20"/><rect x="330" y="214" width="30" height="20"/><rect x="330" y="194" width="30" height="20"/><rect x="330" y="174" width="30" height="20"/><rect x="330" y="154" width="30" height="20"/><rect x="330" y="134" width="30" height="20"/><rect x="330" y="114" width="30" height="20"/><rect x="330" y="94" width="30" height="20"/><rect x="330" y="74" width="30" height="20"/><rect x="330" y="54" width="30" height="20"/><rect x="330" y="34" width="30" height="20"/><rect x="360" y="254" width="30" height="20"/><rect x="360" y="234" width="30" height="20"/><rect x="360" y="214" width="30" height="20"/><rect x="360" y="194" width="30" height="20"/><rect x="360" y="174" width="30" height="20"/><rect x="360" y="154" width="30" height="20"/><rect x="360" y="134" width="30" height="20"/><rect x="360" y="114" width="30" height="20"/><rect x="360" y="94" width="30" height="20"/><rect x="360" y="74" width="30" height="20"/><rect x="360" y="54" width="30" height="20"/><rect x="360" y="34" width="30" height="20"/><rect x="390" y="234" width="30" height="20"/><rect x="390" y="214" width="30" height="20"/><rect x="390" y="174" width="30" height="20"/><rect x="390" y="154" width="30" height="20"/><rect x="390" y="114" width="30" height="20"/><rect x="390" y="94" width="30" height="20"/><rect x="390" y="54" width="30" height="20"/><rect x="390" y="34" width="30" height="20"/><rect x="420" y="254" width="30" height="20"/><rect x="420" y="234" width="30" height="20"/><rect x="420" y="214" width="30" height="20"/><rect x="420" y="194" width="30" height="20"/><rect x="420" y="174" width="30" height="20"/><rect x="420" y="154" width="30" height="20"/><rect x="420" y="134" width="30" height="20"/><rect x="420" y="114" width="30" height="20"/><rect x="420" y="94" width="30" height="20"/><rect x="420" y="74" width="30" height="20"/><rect x="420" y="54" width="30" height="20"/><rect x="420" y="34" width="30" height="20"/><rect x="450" y="254" width="30" height="20"/><rect x="450" y="234" width="30" height="20"/><rect x="450" y="214" width="30" height="20"/><rect x="450" y="194" width="30" height="20"/><rect x="450" y="174" width="30" height="20"/><rect x="450" y="154" width="30" height="20"/><rect x="450" y="134" width="30" height="20"/><rect x="450" y="114" width="30" height="20"/><rect x="450" y="94" width="30" height="20"/><rect x="450" y="74" width="30" height="20"/><rect x="450" y="54" width="30" height="20"/><rect x="450" y="34" width="30" height="20"/></g>
+<g class="re-control" data-paso="2"><rect x="60" y="234" width="30" height="20"/><rect x="60" y="214" width="30" height="20"/><rect x="60" y="174" width="30" height="20"/><rect x="60" y="154" width="30" height="20"/><rect x="60" y="114" width="30" height="20"/><rect x="60" y="94" width="30" height="20"/><rect x="60" y="54" width="30" height="20"/><rect x="60" y="34" width="30" height="20"/><rect x="90" y="254" width="30" height="20"/><rect x="90" y="234" width="30" height="20"/><rect x="90" y="214" width="30" height="20"/><rect x="90" y="194" width="30" height="20"/><rect x="90" y="174" width="30" height="20"/><rect x="90" y="154" width="30" height="20"/><rect x="90" y="134" width="30" height="20"/><rect x="90" y="114" width="30" height="20"/><rect x="90" y="94" width="30" height="20"/><rect x="90" y="74" width="30" height="20"/><rect x="90" y="54" width="30" height="20"/><rect x="90" y="34" width="30" height="20"/><rect x="120" y="254" width="30" height="20"/><rect x="120" y="234" width="30" height="20"/><rect x="120" y="214" width="30" height="20"/><rect x="120" y="194" width="30" height="20"/><rect x="120" y="174" width="30" height="20"/><rect x="120" y="154" width="30" height="20"/><rect x="120" y="134" width="30" height="20"/><rect x="120" y="114" width="30" height="20"/><rect x="120" y="94" width="30" height="20"/><rect x="120" y="74" width="30" height="20"/><rect x="120" y="54" width="30" height="20"/><rect x="120" y="34" width="30" height="20"/></g>
+<g class="re-ref" data-paso="3"><rect x="60" y="254" width="30" height="20"/><rect x="60" y="194" width="30" height="20"/><rect x="60" y="134" width="30" height="20"/><rect x="60" y="74" width="30" height="20"/><rect x="180" y="254" width="30" height="20"/><rect x="180" y="194" width="30" height="20"/><rect x="180" y="134" width="30" height="20"/><rect x="180" y="74" width="30" height="20"/><rect x="270" y="254" width="30" height="20"/><rect x="270" y="194" width="30" height="20"/><rect x="270" y="134" width="30" height="20"/><rect x="270" y="74" width="30" height="20"/><rect x="390" y="254" width="30" height="20"/><rect x="390" y="194" width="30" height="20"/><rect x="390" y="134" width="30" height="20"/><rect x="390" y="74" width="30" height="20"/></g>
+<g><line class="linea" x1="60" y1="34" x2="60" y2="274"/><line class="linea" x1="90" y1="34" x2="90" y2="274"/><line class="linea" x1="120" y1="34" x2="120" y2="274"/><line class="linea" x1="150" y1="34" x2="150" y2="274"/><line class="linea" x1="180" y1="34" x2="180" y2="274"/><line class="linea" x1="210" y1="34" x2="210" y2="274"/><line class="linea" x1="240" y1="34" x2="240" y2="274"/><line class="ranura" x1="270" y1="34" x2="270" y2="274"/><line class="linea" x1="300" y1="34" x2="300" y2="274"/><line class="linea" x1="330" y1="34" x2="330" y2="274"/><line class="linea" x1="360" y1="34" x2="360" y2="274"/><line class="linea" x1="390" y1="34" x2="390" y2="274"/><line class="linea" x1="420" y1="34" x2="420" y2="274"/><line class="linea" x1="450" y1="34" x2="450" y2="274"/><line class="linea" x1="480" y1="34" x2="480" y2="274"/><line class="linea" x1="60" y1="34" x2="480" y2="34"/><line class="linea" x1="60" y1="54" x2="480" y2="54"/><line class="linea" x1="60" y1="74" x2="480" y2="74"/><line class="linea" x1="60" y1="94" x2="480" y2="94"/><line class="linea" x1="60" y1="114" x2="480" y2="114"/><line class="linea" x1="60" y1="134" x2="480" y2="134"/><line class="linea" x1="60" y1="154" x2="480" y2="154"/><line class="linea" x1="60" y1="174" x2="480" y2="174"/><line class="linea" x1="60" y1="194" x2="480" y2="194"/><line class="linea" x1="60" y1="214" x2="480" y2="214"/><line class="linea" x1="60" y1="234" x2="480" y2="234"/><line class="linea" x1="60" y1="254" x2="480" y2="254"/><line class="linea" x1="60" y1="274" x2="480" y2="274"/></g>
+<text class="rot" x="75" y="26" text-anchor="middle">0</text>
+<text class="rot" x="105" y="26" text-anchor="middle">1</text>
+<text class="rot" x="135" y="26" text-anchor="middle">2</text>
+<text class="rot" x="165" y="26" text-anchor="middle">3</text>
+<text class="rot" x="195" y="26" text-anchor="middle">4</text>
+<text class="rot" x="225" y="26" text-anchor="middle">5</text>
+<text class="rot" x="255" y="26" text-anchor="middle">6</text>
+<text class="rot" x="285" y="26" text-anchor="middle">7</text>
+<text class="rot" x="315" y="26" text-anchor="middle">8</text>
+<text class="rot" x="345" y="26" text-anchor="middle">9</text>
+<text class="rot" x="375" y="26" text-anchor="middle">10</text>
+<text class="rot" x="405" y="26" text-anchor="middle">11</text>
+<text class="rot" x="435" y="26" text-anchor="middle">12</text>
+<text class="rot" x="465" y="26" text-anchor="middle">13</text>
+<text class="rot" x="490" y="160">12 × 15 kHz</text>
+<text class="rot" x="490" y="182">= 180 kHz</text>
+<path class="cota" d="M60,284 v8 H270 v-8 M270,292 H480 v-8"/>
+<text class="rot" x="165" y="314" text-anchor="middle">ranura 0,5 ms</text>
+<text class="rot" x="375" y="314" text-anchor="middle">ranura 0,5 ms</text>
+<text class="rot" x="270" y="338" text-anchor="middle">subtrama de 1 ms = 14 símbolos</text>
+<text class="rot" x="50" y="160" text-anchor="end">frec.</text>
+</svg>
+      </figure>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span>Un par de bloques en 1 ms: 12 subportadoras × 14 símbolos = <strong>168 elementos de recurso</strong>. Cada uno lleva un símbolo de modulación.</span></li>
+        <li data-paso="2"><span><span class="muestra" style="background: var(--tinta-suave)"></span>Los primeros 1 a 3 símbolos son de <strong>control</strong> (PDCCH: a quién se asigna cada bloque).</span></li>
+        <li data-paso="3"><span><span class="muestra" style="background: var(--acento)"></span><strong>Señales de referencia</strong> para medir el canal: 16 elementos con 2 antenas.</span></li>
+        <li data-paso="4"><span>Con 3 símbolos de control y 2 antenas, quedan <strong>120 de 168</strong> para datos (71 %).</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ejemplo resuelto: 20 MHz, 64QAM, MIMO 2×2</h2>
+    <table class="tabla">
+      <thead><tr><th>Paso</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Bloques de recursos</td><td>tabla: 20 MHz</td><td class="resultado">100</td></tr>
+        <tr data-paso="2"><td>Sin descontar nada</td><td>100 × 168 × 1000 × 6 bits × 2 capas</td><td class="resultado">201,6 Mbit/s</td></tr>
+        <tr data-paso="3"><td>Elementos de datos (2 antenas)</td><td>168 − 36 de control − 12 de referencia</td><td class="resultado">120</td></tr>
+        <tr data-paso="4"><td>Techo de la celda</td><td>100 × 120 × 1000 × 6 × 2</td><td class="resultado">144,0 Mbit/s</td></tr>
+        <tr data-paso="5"><td>Con 10 usuarios activos</td><td>144,0 / 10</td><td class="resultado">14,4 Mbit/s</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="5">Supuestos: 3 símbolos de control, tantas antenas como capas, sin descontar la codificación de canal. Los teléfonos de categoría 4 (20 MHz, 2×2) anuncian unos 150 Mbit/s porque suponen 1 solo símbolo de control.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Consigna: la velocidad de tu portadora</h2>
+    <p>Tu portadora, según el último dígito de tu cédula: <strong>0–1</strong> 5 MHz, QPSK, 1 capa · <strong>2–3</strong> 10 MHz, 16QAM, 2 capas · <strong>4–5</strong> 15 MHz, 64QAM, 2 capas · <strong>6–7</strong> 3 MHz, 16QAM, 1 capa · <strong>8–9</strong> 10 MHz, 64QAM, 4 capas.</p>
+    <ol>
+      <li>¿Cuántos bloques, cuántas subportadoras y cuánto ancho de banda ocupado?</li>
+      <li>La velocidad sin descontar y el techo de la celda. Elementos de datos: 126 con 1 antena, 120 con 2, 116 con 4.</li>
+      <li>Interpreta a la IA: «cada usuario descarga a la velocidad sin descontar». ¿Qué supuso? ¿Cuánto toca con 10 activos?</li>
+      <li>¿Qué cambia si el usuario está en el borde de la celda?</li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Comprueba con <code>python throughput.py 10 16QAM 2</code> (con tus valores, en <code>semana-03/ejemplos</code>). ¿Quieres mostrarlo? Avísame por chat.</p>
+      <button class="temporizador" type="button" data-minutos="20" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 4 · EJERCICIO APLICADO ============ -->
+
+  <section class="diapositiva bloque" data-bloque="4">
+    <span class="numero">4</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>La IA armó el balance de enlace de una celda. Vemos qué representa cada término y qué pasa si cambiamos uno.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El balance de enlace que armó la IA</h2>
+    <div class="dos-columnas">
+      <table class="tabla apretada">
+        <thead><tr><th>Término (subida)</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Potencia del móvil</td><td class="resultado">+23 dBm</td></tr>
+          <tr><td>Ganancia de la antena del eNodeB</td><td class="resultado">+18 dBi</td></tr>
+          <tr><td>Pérdida de cables</td><td class="resultado">−2 dB</td></tr>
+          <tr><td>Sensibilidad del eNodeB (2 bloques)</td><td class="resultado">−116,4 dBm</td></tr>
+          <tr><td>Margen de sombra</td><td class="resultado">−8 dB</td></tr>
+          <tr><td>Margen de interferencia</td><td class="resultado">−2 dB</td></tr>
+          <tr><td>Pérdida por penetración</td><td class="resultado">−15 dB</td></tr>
+          <tr><td><strong>Pérdida máxima permitida</strong></td><td class="resultado">130,4 dB</td></tr>
+        </tbody>
+      </table>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Sensibilidad</strong> = ruido térmico (−174 dBm/Hz + 10·log<sub>10</sub> del ancho de banda) + figura de ruido (3 dB) + SINR requerida (−1 dB).</span></li>
+        <li data-paso="2"><span><strong>Margen de sombra:</strong> edificios y árboles hacen variar la señal; el margen asegura cobertura casi siempre en el borde.</span></li>
+        <li data-paso="3"><span><strong>Interferencia:</strong> las otras celdas suben el piso de ruido. <strong>Penetración:</strong> las paredes, si el usuario está adentro.</span></li>
+        <li data-paso="4"><span>La IA concluyó: «la cobertura no depende de la velocidad, porque la potencia del móvil es fija». ¿Es cierto?</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Del balance al radio de la celda</h2>
+    <table class="tabla">
+      <thead><tr><th>Paso</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Ruido en 2 bloques (360 kHz)</td><td>−174 + 10·log<sub>10</sub>(360 000)</td><td class="resultado">−118,4 dBm</td></tr>
+        <tr data-paso="2"><td>Sensibilidad</td><td>−118,4 + 3 − 1</td><td class="resultado">−116,4 dBm</td></tr>
+        <tr data-paso="3"><td>Pérdida máxima permitida</td><td>23 + 18 − 2 + 116,4 − 8 − 2 − 15</td><td class="resultado">130,4 dB</td></tr>
+        <tr data-paso="4"><td>Radio (modelo urbano de 3GPP a 2 GHz)</td><td>L = 128,1 + 37,6·log<sub>10</sub>(R) → R = 10<sup>(130,4 − 128,1) / 37,6</sup></td><td class="resultado">1,15 km</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="5">La sensibilidad depende del ancho de banda: más bloques (más velocidad) es más ruido. La conclusión de la IA es falsa: pedir más velocidad en el borde achica la celda.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Consigna: mueve un término</h2>
+    <p>Tu cambio, según el último dígito de tu cédula: <strong>0–1</strong> usuario en la calle (sin penetración) · <strong>2–3</strong> 10 bloques en lugar de 2 · <strong>4–5</strong> margen de sombra de 12 dB · <strong>6–7</strong> móvil de 20 dBm · <strong>8–9</strong> figura de ruido de 5 dB.</p>
+    <ol>
+      <li>Recalcula la pérdida máxima permitida y el radio.</li>
+      <li>¿Cuántos dB cambió y cuánto cambió el radio? ¿Por qué 3 dB no reducen el radio a la mitad?</li>
+      <li>Explica con tus palabras qué representa el término que moviste.</li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Comprueba con <code>python balance.py</code> (en <code>semana-03/ejemplos</code>).</p>
+      <button class="temporizador" type="button" data-minutos="12" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Solución: cada término pesa</h2>
+    <table class="tabla">
+      <thead><tr><th>Cambio</th><th>Pérdida máxima</th><th>Radio</th></tr></thead>
+      <tbody>
+        <tr><td>Caso base: adentro, 2 bloques</td><td>130,4 dB</td><td class="resultado">1,15 km</td></tr>
+        <tr data-paso="1"><td>En la calle (sin 15 dB de penetración)</td><td>145,4 dB</td><td class="resultado">2,89 km</td></tr>
+        <tr data-paso="2"><td>10 bloques en lugar de 2 (+7 dB de ruido)</td><td>123,4 dB</td><td class="resultado">0,75 km</td></tr>
+        <tr data-paso="3"><td>Margen de sombra de 12 dB</td><td>126,4 dB</td><td class="resultado">0,90 km</td></tr>
+        <tr data-paso="4"><td>Móvil de 20 dBm (la mitad de potencia)</td><td>127,4 dB</td><td class="resultado">0,96 km</td></tr>
+        <tr data-paso="5"><td>Figura de ruido de 5 dB</td><td>128,4 dB</td><td class="resultado">1,02 km</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="6">Con este modelo, cada 3 dB menos multiplican el radio por 10<sup>−3/37,6</sup> = 0,83: la pérdida crece con 37,6·log<sub>10</sub>(R), no en proporción a la distancia.</p>
+  </section>
+
+  <!-- ============ BLOQUE 5 · CIERRE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="5">
+    <span class="numero">5</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Canales y pila de protocolos: repaso para el domingo. El Aprendizaje Autónomo 1 vence este domingo.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Canales físicos: quién dice qué</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Canal o señal</th><th>Sentido</th><th>Para qué</th></tr></thead>
+      <tbody>
+        <tr><td><code>PSS · SSS</code></td><td>bajada</td><td>señales de sincronización: el móvil encuentra la celda y su identidad</td></tr>
+        <tr><td><code>PBCH</code></td><td>bajada</td><td>difunde el MIB (ancho de banda, número de trama) con periodo de 40 ms</td></tr>
+        <tr><td><code>PDCCH</code></td><td>bajada</td><td>control: qué bloques le tocan a cada móvil</td></tr>
+        <tr><td><code>PDSCH</code></td><td>bajada</td><td>datos de usuario (y la demás información del sistema, los SIB)</td></tr>
+        <tr><td><code>PRACH</code></td><td>subida</td><td>acceso aleatorio: el primer contacto; sincroniza la subida y pide recursos</td></tr>
+        <tr><td><code>PUCCH</code></td><td>subida</td><td>control: confirmaciones del HARQ, calidad del canal, pedidos de recursos</td></tr>
+        <tr><td><code>PUSCH</code></td><td>subida</td><td>datos de usuario</td></tr>
+      </tbody>
+    </table>
+    <p class="nota">La sincronización de la bajada la dan las señales PSS y SSS; la de la subida se logra con el acceso aleatorio por el PRACH.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La pila de protocolos y el ahorro de energía</h2>
+    <div class="dos-columnas">
+      <table class="tabla apretada">
+        <thead><tr><th>Capa</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td><code>NAS</code></td><td>móvil ↔ MME: <em>attach</em>, autenticación, movilidad</td></tr>
+          <tr><td><code>RRC</code></td><td>móvil ↔ eNodeB: configura la conexión y las mediciones</td></tr>
+          <tr><td><code>PDCP</code></td><td>cifrado y compresión de cabeceras (RoHC)</td></tr>
+          <tr><td><code>RLC</code></td><td>segmenta y reensambla; retransmite si hace falta</td></tr>
+          <tr><td><code>MAC</code></td><td>reparte los recursos; HARQ: retransmisión rápida</td></tr>
+          <tr><td><code>GTP</code></td><td>túneles de datos en el núcleo (S1-U, S5)</td></tr>
+        </tbody>
+      </table>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>RRC Idle:</strong> sin conexión activa con el eNodeB; el móvil solo escucha avisos de llamada. Es el estado que más ahorra.</span></li>
+        <li data-paso="2"><span><strong>RRC Connected:</strong> conexión activa para enviar y recibir datos.</span></li>
+        <li data-paso="3"><span><strong>DRX:</strong> en lugar de revisar el canal de control cada milisegundo, el móvil lo revisa a intervalos y apaga la radio entre medio.</span></li>
+        <li data-paso="4"><span><strong>SC-FDMA</strong> en la subida: menos picos de potencia (PAPR), así que el amplificador del móvil gasta menos.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El Aprendizaje Autónomo 1 vence este domingo</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Contenido</span><span>Los 5 temas de GSM y las 5 preguntas guía, con un diagrama propio de un flujo completo.</span></li>
+      <li><span class="que">Conclusión</span><span>Un ejemplo concreto que conecte GSM con lo de ahora: la autenticación mutua de UMTS, o el eNodeB que absorbe a la controladora.</span></li>
+      <li><span class="que">Referencias</span><span>Al menos 3 que existan y digan lo que citas, en APA 7. Es individual: 3 a 4 páginas.</span></li>
+    </ul>
+    <p class="nota">Guía completa y rúbrica: <a href="../ver.html?f=entregas/aa1.md">Aprendizaje Autónomo 1</a>. Vence el domingo 15 de noviembre.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo usar el tutor</h2>
+    <ol>
+      <li>Abre el sitio del curso y pulsa <strong>Copiar tutor</strong> en la semana 4. También puedes <a href="../ver.html?f=semana-04/tutor.md">abrirlo aquí</a>.</li>
+      <li>Pégalo completo en ChatGPT, Gemini o Claude (sirve la versión gratuita).</li>
+      <li>Conversa 20–30 minutos. Te hará preguntas y no te dará respuestas.</li>
+      <li>Al final, envía tu ticket de entrada en el <a href="https://forms.cloud.microsoft/r/h4WBZUxVVN">formulario de tickets</a> hasta las 12:00 del martes 17 de noviembre.</li>
+    </ol>
+    <p class="nota">Si tienes poco tiempo, escribe RÁPIDO al empezar: irá directo a las preguntas de control.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Antes de irnos</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Este domingo, 15 nov</span><span>Aprendizaje Práctico de la semana 3 y Aprendizaje Autónomo 1.</span></li>
+      <li><span class="que">Si ves la grabación</span><span>Resuelve la consigna del bloque 3 con tu portadora y compruébala con <code>throughput.py</code>. Luego mueve un término del balance de enlace (bloque 4) y explica en dos líneas por qué cambió el radio.</span></li>
+      <li><span class="que">Próxima semana</span><span>Voz sobre LTE y WiFi. Explicaré el Aprendizaje Autónomo 2. Antes, usa el <a href="../ver.html?f=semana-04/tutor.md">tutor de la semana 4</a>.</span></li>
+    </ul>
+  </section>
+
+</main>
+<script src="../assets/secuencia.js"></script>
+<script src="../assets/presentacion.js"></script>
+<script src="anim-ofdm.js"></script>
+</body>
+</html>
