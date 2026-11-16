@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamentos de Redes Inalámbricas · Semana 4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Overpass:wght@400;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="../assets/presentacion.css">
+  <script src="../assets/tema.js"></script>
+  <style>
+    /* Mapa del IMS */
+    .arq svg { width: 100%; height: auto; max-height: calc(var(--u) * 60); display: block; font-family: var(--f-texto); }
+    .arq .caja rect { fill: var(--caja-diagrama); }
+    .arq .caja text { fill: var(--texto-caja-diagrama); font-size: 22px; font-weight: 800; }
+    .arq .caja text.sub { font-size: 15px; font-weight: 600; }
+    .arq .externo rect { fill: none; stroke: var(--caja-diagrama); stroke-width: 3; }
+    .arq .externo text { fill: var(--tinta); font-size: 19px; font-weight: 800; }
+    .arq .enlace { stroke: var(--acento); stroke-width: 4; fill: none; }
+    .arq .enlace.control { stroke-dasharray: 9 7; stroke-width: 3; }
+    .arq .enlace.radio { stroke-dasharray: 3 6; }
+    .arq .interfaz { fill: var(--acento); font-family: var(--f-codigo); font-size: 16px; font-weight: 600; }
+    .arq .subsistema rect { fill: none; stroke: var(--tinta-suave); stroke-width: 2; stroke-dasharray: 8 6; }
+    .arq .subsistema text { fill: var(--tinta-suave); font-size: 18px; font-weight: 800; }
+    .lectura .arq { overflow-x: auto; }
+    .lectura .arq svg { min-width: 680px; }
+    .presentacion .respuesta-ia { font-size: calc(var(--u) * 2.45); }
+    .presentacion .caso-ia { grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 4); }
+    .presentacion .caso-ia .ideas.compactas li { font-size: calc(var(--u) * 3.1); }
+    .presentacion .tabla.apretada { font-size: calc(var(--u) * 2.9); }
+    .presentacion .tabla.apretada td, .presentacion .tabla.apretada th { padding-top: calc(var(--u) * 0.7); padding-bottom: calc(var(--u) * 0.7); }
+    .tabla td:first-child code { white-space: nowrap; }
+    .presentacion pre.sip { font-size: calc(var(--u) * 2.45); line-height: 1.4; }
+  </style>
+</head>
+<body data-curso="redes-inalambricas" data-formato="guiada" data-bloque2="La voz en LTE y el IMS" data-bloque3="Una llamada VoLTE" data-bloque4="Sin LTE y segundo trabajo">
+<div class="barra-lectura">
+  <a href="../index.html">Volver al curso</a>
+  <button type="button" class="boton" data-alternar-tema>Modo oscuro</button>
+</div>
+<main class="escenario">
+
+  <section class="diapositiva portada">
+    <div class="portada-panel">
+      <span>Semana</span>
+      <span class="semana-numero">4</span>
+      <span>de 7</span>
+    </div>
+    <div class="portada-texto">
+      <p class="curso">Fundamentos de Redes Inalámbricas</p>
+      <h1>Voz sobre LTE y WiFi</h1>
+      <p class="objetivo">Entender qué hace cada elemento del IMS, seguir una llamada VoLTE mensaje por mensaje, calcular cuánto ahorra la compresión de cabeceras y ver qué pasa con la voz cuando no hay LTE.</p>
+      <p class="fecha">Martes 17 de noviembre · 19:00</p>
+      <div class="recorrido-completo"></div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Plan de hoy</h2>
+    <ol class="plan">
+      <li data-bloque="1">Pista para el Aprendizaje Práctico y lo que necesitas a mano.</li>
+      <li data-bloque="2">Por qué la voz en 4G es distinta, el mapa del IMS, quién hace qué y sus servicios.</li>
+      <li data-bloque="3">La IA describe una llamada VoLTE y la revisamos mensaje por mensaje. Cuánto pesa cada paquete de voz, y tu propio cálculo.</li>
+      <li data-bloque="4">Qué hace la radio por la voz, qué pasa sin LTE o por WiFi, y el Aprendizaje Autónomo 2 completo.</li>
+      <li data-bloque="5">Repaso de los conceptos de la semana y el tutor de la semana 5.</li>
+    </ol>
+  </section>
+
+  <!-- ============ BLOQUE 1 · PUENTE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="1">
+    <span class="numero">1</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Para el Aprendizaje Práctico de este domingo</h2>
+    <p class="pista">Para cada elemento del IMS, pregúntate qué hace con una llamada: ¿primera puerta, núcleo de la señalización, base de datos, políticas de calidad, recursos multimedia o salida a la telefonía fija? Distingue el protocolo de las llamadas del de las bases de datos. Y para cada servicio, piensa en un ejemplo de tu teléfono.</p>
+    <p class="nota">Una pista, no la pregunta. El cuestionario vence el domingo 22 de noviembre. Hoy explico, en orden, todos los conceptos que necesitas.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ten a mano para hoy</h2>
+    <ol class="plan">
+      <li><span class="min">1</span><span><strong>Una calculadora</strong>, o Python. En el bloque 3 calcularás cuánto ocupa una llamada.</span></li>
+      <li><span class="min">2</span><span><strong>El último dígito de tu cédula:</strong> elige el códec de tu llamada.</span></li>
+      <li><span class="min">3</span><span>Opcional: descarga <a href="ejemplos/voz.py"><code>voz.py</code></a> para comprobar tu resultado con <code>python voz.py 12.2 4</code>.</span></li>
+    </ol>
+    <p class="nota">No hace falta haber leído antes: primero explico el tema completo y después lo practicamos. Las dudas, al chat en cualquier momento.</p>
+  </section>
+
+  <!-- ============ BLOQUE 2 · EXPLICACIÓN ============ -->
+
+  <section class="diapositiva bloque" data-bloque="2">
+    <span class="numero">2</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Por qué la voz en 4G necesita algo nuevo, el mapa del IMS, quién hace qué y qué servicios ofrece.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>De la voz por circuitos a la voz por IMS</h2>
+    <p>En 2G y 3G, una llamada reservaba un <strong>circuito</strong>: un camino fijo solo para ti, aunque estuvieras callado. LTE solo transporta paquetes IP: la voz también viaja en paquetes, y las llamadas las organiza el <strong>IMS</strong> (<em>IP Multimedia Subsystem</em>).</p>
+    <table class="tabla apretada">
+      <thead><tr><th>Aspecto</th><th>GSM y UMTS</th><th>VoLTE (hoy)</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Quién controla la llamada</td><td>el MSC</td><td>los CSCF del IMS</td></tr>
+        <tr data-paso="1"><td>Señalización de la llamada</td><td>DTAP, ISUP (sobre SS7)</td><td>SIP</td></tr>
+        <tr data-paso="2"><td>Base de suscriptores</td><td>HLR, por MAP</td><td>HSS, por Diameter</td></tr>
+        <tr data-paso="2"><td>Calidad de la voz</td><td>un circuito reservado</td><td>portadora dedicada QCI 1, ordenada por el PCRF</td></tr>
+        <tr data-paso="3"><td>Transporte de la voz</td><td><em>timeslot</em> o canal dedicado</td><td>paquetes RTP sobre UDP e IP</td></tr>
+        <tr data-paso="3"><td>Si no hay LTE</td><td>—</td><td>SR-VCC: la llamada pasa a 2G o 3G</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tres ideas para llevarse</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span>LTE no tiene circuitos: la voz viaja como paquetes IP y la controla el <strong>IMS</strong>. Los <strong>CSCF</strong> manejan la señalización <strong>SIP</strong> (P-CSCF, la primera puerta; S-CSCF, el núcleo); el <strong>HSS</strong> guarda perfiles y claves y responde por <strong>Diameter</strong>.</span></li>
+      <li data-paso="2"><span>La voz necesita calidad garantizada: el <strong>PCRF</strong> ordena una portadora dedicada (<strong>QCI 1</strong>). <strong>RoHC</strong> comprime las cabeceras, <strong>HARQ</strong> retransmite rápido y <strong>DRX</strong> ahorra batería entre paquete y paquete.</span></li>
+      <li data-paso="3"><span>Si se acaba el LTE a mitad de una llamada, <strong>SR-VCC</strong> la pasa a 2G o 3G. Por WiFi, la voz entra al mismo IMS a través del <strong>ePDG</strong>. Y para la red telefónica fija, <strong>BGCF</strong> y <strong>MGCF</strong> hacen de puente.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El mapa del IMS</h2>
+    <figure class="arq">
+      <svg viewBox="0 0 1000 470" role="img" aria-label="Arquitectura IMS: el móvil llega por la red LTE al P-CSCF. El P-CSCF pasa la señalización SIP al S-CSCF, núcleo de la señalización. El I-CSCF es la entrada del dominio y consulta al HSS por Diameter. El S-CSCF usa servidores de aplicación y la MRF para conferencias. BGCF y MGCF conectan con la PSTN. El PCRF recibe del P-CSCF el pedido de calidad (Rx) y ordena la portadora a la red LTE (Gx).">
+        <g data-paso="1">
+          <g class="subsistema"><rect x="300" y="20" width="695" height="380" rx="14"/><text x="318" y="300">IMS · control de sesiones</text></g>
+          <line class="enlace radio" x1="90" y1="216" x2="120" y2="216"/>
+          <line class="enlace" x1="270" y1="216" x2="320" y2="216"/>
+          <text class="interfaz" x="295" y="206" text-anchor="middle">SIP</text>
+          <g class="caja"><rect x="0" y="180" width="90" height="72" rx="10"/><text x="45" y="212" text-anchor="middle">UE</text><text class="sub" x="45" y="236" text-anchor="middle">teléfono</text></g>
+          <g class="caja"><rect x="120" y="180" width="150" height="72" rx="10"/><text x="195" y="212" text-anchor="middle">LTE / EPC</text><text class="sub" x="195" y="236" text-anchor="middle">portadoras</text></g>
+          <g class="caja"><rect x="320" y="180" width="140" height="72" rx="10"/><text x="390" y="212" text-anchor="middle">P-CSCF</text><text class="sub" x="390" y="236" text-anchor="middle">primera puerta</text></g>
+        </g>
+        <g data-paso="2">
+          <line class="enlace" x1="460" y1="216" x2="520" y2="216"/>
+          <line class="enlace" x1="590" y1="180" x2="590" y2="112"/>
+          <line class="enlace control" x1="660" y1="76" x2="760" y2="76"/>
+          <line class="enlace control" x1="660" y1="196" x2="760" y2="100"/>
+          <text class="interfaz" x="710" y="66" text-anchor="middle">Diameter</text>
+          <g class="caja"><rect x="520" y="180" width="140" height="72" rx="10"/><text x="590" y="212" text-anchor="middle">S-CSCF</text><text class="sub" x="590" y="236" text-anchor="middle">núcleo SIP</text></g>
+          <g class="caja"><rect x="520" y="40" width="140" height="72" rx="10"/><text x="590" y="72" text-anchor="middle">I-CSCF</text><text class="sub" x="590" y="96" text-anchor="middle">entrada del dominio</text></g>
+          <g class="caja"><rect x="760" y="40" width="150" height="72" rx="10"/><text x="835" y="72" text-anchor="middle">HSS</text><text class="sub" x="835" y="96" text-anchor="middle">perfiles y claves</text></g>
+        </g>
+        <g data-paso="3">
+          <line class="enlace" x1="660" y1="230" x2="760" y2="230"/>
+          <line class="enlace" x1="560" y1="252" x2="560" y2="320"/>
+          <g class="caja"><rect x="760" y="194" width="150" height="72" rx="10"/><text x="835" y="226" text-anchor="middle">AS</text><text class="sub" x="835" y="250" text-anchor="middle">servidores de servicios</text></g>
+          <g class="caja"><rect x="480" y="320" width="150" height="62" rx="10"/><text x="555" y="348" text-anchor="middle">MRF</text><text class="sub" x="555" y="370" text-anchor="middle">conferencias, tonos</text></g>
+        </g>
+        <g data-paso="4">
+          <path class="enlace" d="M640,252 L700,320"/>
+          <line class="enlace" x1="820" y1="351" x2="850" y2="351"/>
+          <line class="enlace" x1="920" y1="382" x2="920" y2="410"/>
+          <g class="caja"><rect x="700" y="320" width="120" height="62" rx="10"/><text x="760" y="348" text-anchor="middle">BGCF</text><text class="sub" x="760" y="370" text-anchor="middle">elige la salida</text></g>
+          <g class="caja"><rect x="850" y="320" width="140" height="62" rx="10"/><text x="920" y="348" text-anchor="middle">MGCF</text><text class="sub" x="920" y="370" text-anchor="middle">SIP ↔ ISUP</text></g>
+          <g class="externo"><rect x="860" y="410" width="120" height="50" rx="10"/><text x="920" y="442" text-anchor="middle">PSTN</text></g>
+        </g>
+        <g data-paso="5">
+          <line class="enlace control" x1="195" y1="112" x2="195" y2="180"/>
+          <line class="enlace control" x1="270" y1="90" x2="340" y2="180"/>
+          <text class="interfaz" x="180" y="152" text-anchor="end">Gx</text>
+          <text class="interfaz" x="318" y="128">Rx</text>
+          <g class="caja"><rect x="120" y="40" width="150" height="72" rx="10"/><text x="195" y="72" text-anchor="middle">PCRF</text><text class="sub" x="195" y="96" text-anchor="middle">políticas de QoS</text></g>
+        </g>
+      </svg>
+      <figcaption>SIP para las llamadas; Diameter (línea discontinua) para las bases de datos y las políticas. El PCRF es del núcleo LTE, pero trabaja con el IMS.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Los elementos del IMS: quién hace qué</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Elemento</th><th>Qué hace con una llamada</th><th>Si vienes de software</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td><code>P-CSCF</code></td><td>primer punto de contacto del teléfono con el IMS; pide la calidad de servicio al PCRF</td><td>el <em>proxy</em> de entrada</td></tr>
+        <tr data-paso="1"><td><code>I-CSCF</code></td><td>entrada del dominio del operador: consulta al HSS qué S-CSCF atiende a cada usuario</td><td>la recepción que te dirige</td></tr>
+        <tr data-paso="1"><td><code>S-CSCF</code></td><td>núcleo de la señalización SIP: registra, autentica con el HSS y enruta las sesiones</td><td>el controlador</td></tr>
+        <tr data-paso="2"><td><code>HSS</code></td><td>perfiles de usuario y datos de autenticación; habla Diameter con los CSCF</td><td>la base de usuarios</td></tr>
+        <tr data-paso="2"><td><code>PCRF</code></td><td>políticas de calidad de servicio y cobro: ordena la portadora de la voz</td><td>el motor de reglas</td></tr>
+        <tr data-paso="3"><td><code>MRF</code></td><td>recursos multimedia: mezcla el audio de las conferencias, tonos y anuncios</td><td>el mezclador</td></tr>
+        <tr data-paso="4"><td><code>BGCF</code></td><td>si el destino es un número de la red telefónica, elige por dónde salir</td><td>la tabla de rutas de salida</td></tr>
+        <tr data-paso="4"><td><code>MGCF</code></td><td>interconexión con la PSTN: traduce entre SIP e ISUP (con su pasarela de medios)</td><td>el adaptador de protocolos</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Servicios sobre el mismo IMS</h2>
+    <div class="dos-columnas">
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Presencia:</strong> ver si un contacto está disponible, en tiempo real, como el «en línea» de un chat.</span></li>
+        <li data-paso="1"><span><strong>Mensajería instantánea:</strong> mensajes de texto en tiempo real, como en un chat.</span></li>
+        <li data-paso="2"><span><strong>Push-to-Talk (PoC):</strong> como un walkie-talkie: pulsas, hablas y los demás escuchan.</span></li>
+        <li data-paso="2"><span><strong>Conferencias:</strong> varios participantes a la vez; la MRF mezcla el audio.</span></li>
+      </ul>
+      <table class="tabla apretada" data-paso="3">
+        <thead><tr><th></th><th>Push-to-Talk</th><th>Conferencia</th></tr></thead>
+        <tbody>
+          <tr><td>Quién habla</td><td>uno a la vez, al pulsar</td><td>todos a la vez</td></tr>
+          <tr><td>Sentido</td><td>bidireccional, por turnos (semidúplex)</td><td>bidireccional y simultáneo (dúplex)</td></tr>
+          <tr><td>Grupo</td><td>uno a uno o un grupo</td><td>un grupo</td></tr>
+          <tr><td>El audio</td><td>pasa de quien habla a los demás</td><td>la MRF lo mezcla</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota" data-paso="3">Si todos hablan a la vez y la red mezcla las voces, es una conferencia. Si se habla por turnos al pulsar, aunque sea en grupo, es Push-to-Talk.</p>
+  </section>
+
+  <section class="diapositiva pregunta">
+    <p class="nota">Responde en el Forms del chat de la reunión</p>
+    <p class="enunciado">Una llamada VoLTE ya está establecida y las dos personas conversan. ¿Por dónde viajan los paquetes de voz?</p>
+    <ol class="opciones">
+      <li>Por el P-CSCF y el S-CSCF, que controlan la llamada</li>
+      <li>Por el HSS, que conoce a los dos usuarios</li>
+      <li>Por las portadoras de LTE, de un teléfono al otro, sin pasar por los CSCF</li>
+      <li>Por la MRF, que mezcla el audio de todas las llamadas</li>
+    </ol>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Dos caminos: la señalización y la voz</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Tráfico</th><th>Protocolo</th><th>Por dónde va</th><th>Calidad (QCI)</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Establecer y terminar la llamada</td><td>SIP</td><td>teléfono → P-CSCF → S-CSCF → … → otro teléfono</td><td><code>5</code>: sin tasa garantizada, prioridad máxima</td></tr>
+        <tr data-paso="2"><td>Consultar perfiles y pedir calidad</td><td>Diameter</td><td>CSCF ↔ HSS · P-CSCF ↔ PCRF</td><td>dentro del núcleo</td></tr>
+        <tr data-paso="3"><td>La voz</td><td>RTP sobre UDP e IP</td><td>de portadora en portadora, entre los teléfonos</td><td><code>1</code>: tasa garantizada, 100 ms</td></tr>
+        <tr data-paso="4"><td>Video llamada</td><td>RTP</td><td>igual que la voz</td><td><code>2</code>: tasa garantizada, 150 ms</td></tr>
+        <tr data-paso="4"><td>Navegar, aplicaciones</td><td>IP</td><td>portadora por defecto</td><td><code>9</code>: sin garantía</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="3">Respuesta: <mark>por las portadoras</mark>. El IMS controla la sesión, pero la voz no pasa por los CSCF. Solo en una conferencia la MRF recibe el audio para mezclarlo.</p>
+  </section>
+
+  <!-- ============ BLOQUE 3 · PRÁCTICA GUIADA ============ -->
+
+  <section class="diapositiva bloque" data-bloque="3">
+    <span class="numero">3</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>La IA describe una llamada VoLTE y la revisamos con el mapa. Después, cuánto pesa cada paquete de voz y tu propio cálculo.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Le pedimos a la IA el flujo de una llamada</h2>
+    <div class="dos-columnas">
+      <div>
+        <p>Le pedimos:</p>
+        <pre class="prompt">Describe paso a paso una llamada VoLTE entre dos clientes del mismo operador: qué mensajes SIP se intercambian, qué elemento del IMS procesa cada uno y cuándo se reserva la calidad de servicio.</pre>
+      </div>
+      <div>
+        <h3>Para interpretar su respuesta</h3>
+        <ul>
+          <li data-paso="1">¿Quién es la primera puerta y quién decide sobre la llamada?</li>
+          <li data-paso="2">¿Qué protocolo usa para consultar al HSS?</li>
+          <li data-paso="3">¿Quién pide la calidad de servicio y a quién?</li>
+          <li data-paso="4">¿Por dónde viaja el audio?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que respondió, leído con la teoría</h2>
+    <div class="dos-columnas caso-ia">
+      <pre class="prompt respuesta-ia">1. El teléfono A ya está registrado (REGISTER). Envía un INVITE al P-CSCF con los códecs que acepta (SDP).
+2. El P-CSCF lo pasa al S-CSCF de A, que aplica los servicios del usuario.
+3. El I-CSCF consulta al HSS qué S-CSCF atiende a B, y el INVITE llega a B.
+4. B responde 183 con sus códecs. El P-CSCF pide al PCRF una portadora dedicada con QCI 1.
+5. B suena (180 Ringing) y contesta (200 OK); A confirma con ACK.
+6. Durante la llamada, el audio RTP pasa por el S-CSCF, que lo reenvía a B.</pre>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong>Pasos 1–2:</strong> bien. El P-CSCF es la primera puerta; el S-CSCF, el núcleo que decide.</span></li>
+        <li data-paso="2"><span><strong>Paso 3:</strong> bien. El I-CSCF es la entrada del dominio y consulta al HSS por Diameter, no por SIP.</span></li>
+        <li data-paso="3"><span><strong>Paso 4:</strong> bien. El PCRF ordena la portadora QCI 1 al núcleo LTE. La señalización viaja en otra, con QCI 5.</span></li>
+        <li data-paso="4"><span><strong>Paso 6:</strong> falso. El audio va de portadora en portadora entre los teléfonos; el IMS solo controla la sesión. Solo en una conferencia la MRF mezcla el audio.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La llamada, mensaje por mensaje</h2>
+    <figure class="secuencia" data-actores="UE A, P-CSCF, PCRF, S-CSCF, UE B" data-espacio="58">
+      <ol>
+        <li data-de="UE A" data-a="P-CSCF" data-nota="SDP: AMR-WB">INVITE</li>
+        <li data-de="P-CSCF" data-a="S-CSCF" data-nota="aplica los servicios">INVITE</li>
+        <li data-de="S-CSCF" data-a="UE B" data-nota="vía I-CSCF y P-CSCF de B">INVITE</li>
+        <li data-de="UE B" data-a="S-CSCF" data-tipo="respuesta" data-nota="SDP de B">183 Progress</li>
+        <li data-de="S-CSCF" data-a="P-CSCF" data-tipo="respuesta">183 Progress</li>
+        <li data-de="P-CSCF" data-a="PCRF" data-nota="Diameter (Rx)">Pide QoS</li>
+        <li data-de="PCRF" data-a="PCRF" data-nota="al PDN-GW (Gx)">Portadora QCI 1</li>
+        <li data-de="P-CSCF" data-a="UE A" data-tipo="respuesta">183 Progress</li>
+        <li data-de="UE B" data-a="UE A" data-tipo="respuesta" data-nota="suena">180 Ringing</li>
+        <li data-de="UE B" data-a="UE A" data-tipo="respuesta" data-nota="contesta">200 OK</li>
+        <li data-de="UE A" data-a="UE B">ACK</li>
+        <li data-de="UE A" data-a="UE B" data-nota="por las portadoras, sin pasar por el IMS">Audio RTP</li>
+      </ol>
+      <figcaption>Simplificado: las respuestas de B también pasan por los CSCF; se dibujan directas para leerlas mejor. La Evaluación en Contacto con el Docente usa este mismo esquema: INVITE, 200 OK, ACK y audio RTP.</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Un INVITE por dentro</h2>
+    <div class="dos-columnas">
+      <pre class="sip"><code>INVITE tel:+593990000002 SIP/2.0
+Via: SIP/2.0/UDP [2001:db8::a1]:5060
+From: &lt;sip:+593990000001@ims.operador.example&gt;
+To: &lt;tel:+593990000002&gt;
+Call-ID: 8f2c1e@2001:db8::a1
+CSeq: 1 INVITE
+Content-Type: application/sdp
+
+<span class="clave">m=audio 49152 RTP/AVP 97</span>
+<span class="clave">a=rtpmap:97 AMR-WB/16000</span>
+<span class="clave">a=ptime:20</span></code></pre>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span>Arriba, la <strong>cabecera SIP</strong>: a quién se llama, quién llama y un identificador de la llamada (Call-ID).</span></li>
+        <li data-paso="2"><span>Abajo, el <strong>SDP</strong>: el puerto donde A espera el audio, el códec (AMR-WB, con reloj de 16 kHz) y un paquete cada 20 ms (<code>ptime</code>).</span></li>
+        <li data-paso="3"><span>Con el códec y el <code>ptime</code> ya se puede calcular el ancho de banda de la llamada. Es lo que hacemos ahora.</span></li>
+      </ul>
+    </div>
+    <p class="nota">Ejemplo ilustrativo con direcciones y números reservados para documentación. Archivo completo: <code>semana-04/ejemplos/invite.txt</code>.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>¿Qué pesa más en un paquete de voz?</h2>
+    <p>AMR-WB de 12,65 kbit/s, sobre IPv6, un paquete cada 20 ms. Antes de ver la tabla, escribe en el chat: <strong>¿la voz o las cabeceras?</strong></p>
+    <table class="tabla">
+      <thead><tr><th>Parte</th><th>Cálculo</th><th>Bytes</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Voz (20 ms de AMR-WB)</td><td>12 650 bit/s × 0,020 s = 253 bits → bytes enteros</td><td class="resultado">32</td></tr>
+        <tr data-paso="2"><td>Cabecera RTP</td><td>número de secuencia y marca de tiempo</td><td class="resultado">12</td></tr>
+        <tr data-paso="2"><td>Cabecera UDP</td><td>puertos</td><td class="resultado">8</td></tr>
+        <tr data-paso="2"><td>Cabecera IPv6</td><td>direcciones de 128 bits (IPv4: 20 bytes)</td><td class="resultado">40</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="3">Las <mark>cabeceras</mark>: 60 de 92 bytes, el 65 %. La señalización SIP no viaja en estos paquetes: va por su propia portadora, al inicio y al final de la llamada.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ejemplo resuelto: AMR-WB de 12,65 kbit/s sobre IPv6</h2>
+    <table class="tabla">
+      <thead><tr><th>Paso</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Paquetes por segundo</td><td>1 / 20 ms</td><td class="resultado">50</td></tr>
+        <tr data-paso="2"><td>Paquete sin compresión</td><td>32 de voz + 60 de cabeceras</td><td class="resultado">92 bytes</td></tr>
+        <tr data-paso="3"><td>Ancho de banda sin RoHC</td><td>92 × 8 bits × 50</td><td class="resultado">36,8 kbit/s</td></tr>
+        <tr data-paso="4"><td>Con RoHC (cabeceras ≈ 3 bytes)</td><td>(32 + 3) × 8 × 50</td><td class="resultado">14,0 kbit/s</td></tr>
+        <tr data-paso="5"><td>Ahorro</td><td>1 − 14,0 / 36,8</td><td class="resultado">62 %</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="5">A nivel IP y en un sentido. RoHC (<em>Robust Header Compression</em>) trabaja en el PDCP, solo en la radio: en el núcleo la cabecera viaja completa.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que RoHC le quita a cada paquete</h2>
+    <figure id="anim-rohc">
+      <figcaption class="solo-lector">Cada paquete de voz lleva 32 bytes de voz y 60 de cabeceras. RoHC las reduce a unos 3 bytes en la radio: el ancho de banda baja de 36,8 a 14,0 kbit/s. <span data-paso="1"></span><span data-paso="2"></span><span data-paso="3"></span><span data-paso="4"></span><span data-paso="5"></span></figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tu turno: el ancho de banda de tu llamada</h2>
+    <p>Tu códec, según el último dígito de tu cédula: <strong>0–1</strong> AMR 12,2 kbit/s, IPv4 · <strong>2–3</strong> AMR-WB 23,85, IPv6 · <strong>4–5</strong> EVS 13,2, IPv6 · <strong>6–7</strong> AMR-WB 8,85, IPv6 · <strong>8–9</strong> EVS 24,4, IPv4. Un paquete cada 20 ms.</p>
+    <ol class="plan">
+      <li><span class="min">0–2</span><span>Bytes de voz por paquete (redondea hacia arriba) y bytes de cabeceras.</span></li>
+      <li><span class="min">2–4</span><span>Ancho de banda sin RoHC y con RoHC (3 bytes), con la tabla del ejemplo.</span></li>
+      <li><span class="min">4–5</span><span>Escribe en el chat tu dígito y el <strong>ahorro en %</strong>. ¿Ahorran todos lo mismo?</span></li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Compruébalo con <code>python voz.py 12.2 4</code> (con tus valores). ¿Te salió algo raro? Pégalo en el chat y lo vemos en pantalla.</p>
+      <button class="temporizador" type="button" data-minutos="5" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 4 · EXPLICACIÓN Y TRABAJO ============ -->
+
+  <section class="diapositiva bloque" data-bloque="4">
+    <span class="numero">4</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Lo que hace la radio por la voz, qué pasa sin LTE o por WiFi, y el Aprendizaje Autónomo 2 completo.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La radio también cuida la voz</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span><strong>RoHC, en el PDCP:</strong> deja las cabeceras en unos 3 bytes. Con tu cálculo ya viste cuánto ahorra.</span></li>
+      <li data-paso="2"><span><strong>HARQ, en la capa MAC:</strong> si un paquete llega dañado, se retransmite en pocos milisegundos. La voz no puede esperar un reenvío lento de extremo a extremo.</span></li>
+      <li data-paso="3"><span><strong>DRX, recepción discontinua:</strong> entre paquete y paquete (20 ms) la radio del teléfono duerme y despierta justo a tiempo. Ahorra batería durante la llamada y en reposo.</span></li>
+    </ul>
+    <p class="nota">Las tres aparecieron la semana pasada, en la pila de LTE. Con la voz se ve para qué sirven.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cuando no hay LTE: 3G, 2G y WiFi</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>SR-VCC</h3>
+        <ul class="ideas compactas">
+          <li data-paso="1"><span>Sales de la cobertura LTE a mitad de una llamada. El MME pide al MSC de 2G o 3G que prepare un circuito.</span></li>
+          <li data-paso="2"><span>El teléfono, con una sola radio, salta a la otra red y la llamada sigue: <em>Single Radio Voice Call Continuity</em>.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Llamadas por WiFi</h3>
+        <ul class="ideas compactas">
+          <li data-paso="3"><span>Desde un WiFi que el operador no controla, el teléfono abre un túnel cifrado (IPsec) hasta el <strong>ePDG</strong>, que lo conecta al PDN-GW y al mismo IMS.</span></li>
+          <li data-paso="4"><span>El PDN-GW es el ancla: al pasar de LTE a WiFi se conserva la IP y la llamada. El <strong>ANDSF</strong> le dice al teléfono qué red preferir.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Aprendizaje Autónomo 2</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>Qué entregas</h3>
+        <ul>
+          <li>Un informe técnico de 5 a 6 páginas que <strong>compare</strong> LTE y 5G y analice su integración con WiFi.</li>
+          <li>Cuatro ejes: arquitecturas, acceso radio, voz y QoS, convergencia con WiFi. Y las 4 preguntas guía.</li>
+          <li>Introducción, análisis comparativo con tabla y diagramas, un caso real de un operador, conclusiones y referencias en APA 7.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Aclaraciones al enunciado</h3>
+        <ul>
+          <li>Es <strong>individual</strong> y cubre las semanas 3 a 6.</li>
+          <li>El caso puede ser de un operador de cualquier país, con fuente verificable.</li>
+          <li>Si el enunciado menciona ATSSS, cuenta como parte del acceso unificado de 5G y WiFi.</li>
+          <li>Vence el <strong>domingo 6 de diciembre</strong>.</li>
+        </ul>
+        <p><a href="../ver.html?f=entregas/aa2.md">Guía completa y rúbrica</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo se califica</h2>
+    <ul class="cierre-lista">
+      <li data-paso="1"><span class="que">Profundidad técnica</span><span>Las 4 preguntas guía respondidas a fondo: cómo funciona cada mecanismo, qué impacto tiene y qué desafíos trae. Nombrarlos no basta.</span></li>
+      <li data-paso="2"><span class="que">Comparativa tecnológica</span><span>Tu propia tabla con los 3 ejes (arquitectura, radio, convergencia) y tus propios diagramas de las dos arquitecturas, analizados en el texto.</span></li>
+      <li data-paso="3"><span class="que">Aplicación práctica</span><span>Un caso real documentado: operador, año, qué implementó, con fuente. Conectado con la teoría.</span></li>
+      <li data-paso="4"><span class="que">Calidad académica</span><span>5 o más referencias, al menos 2 de 3GPP o IEEE; APA 7; 5 a 6 páginas.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo de hoy ya llena dos filas de tu tabla</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Eje</th><th>Pregunta que responde tu fila</th><th>LTE</th><th>5G</th></tr></thead>
+      <tbody>
+        <tr><td>Arquitectura</td><td>¿Quién controla la señalización? ¿Por dónde pasan los datos?</td><td>semana 3</td><td>semana 5</td></tr>
+        <tr><td>Radio</td><td>¿Qué acceso múltiple, qué anchos de banda, cuántas antenas?</td><td>semana 3</td><td>semana 5</td></tr>
+        <tr><td>Voz y QoS</td><td>¿Cómo se garantiza la calidad de la voz?</td><td><mark>hoy</mark>: IMS, QCI 1, RoHC</td><td>semana 5</td></tr>
+        <tr><td>Convergencia</td><td>¿Cómo entra un usuario por WiFi y cómo cambia de red?</td><td><mark>hoy</mark>: ePDG, ANDSF</td><td>semanas 5 y 6</td></tr>
+      </tbody>
+    </table>
+    <ul class="ideas compactas" style="margin-top: calc(var(--u) * 3)">
+      <li><span>Llena cada celda con tus palabras al terminar cada semana, y anota la fuente al lado.</span></li>
+      <li><span>Fuentes de 3GPP gratuitas: TS 23.401 (núcleo LTE) y TS 23.501 (núcleo 5G). Cítalas con su año y su versión.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Aprendizaje Autónomo 1: lo que más resta</h2>
+    <ul class="ideas compactas">
+      <li data-paso="1"><span><strong>Listar sin explicar:</strong> los componentes aparecen uno por uno, pero no cómo interactúan en un flujo. Un diagrama propio lo resuelve.</span></li>
+      <li data-paso="2"><span><strong>Confundir conceptos:</strong> HLR con VLR, o FDMA con TDMA.</span></li>
+      <li data-paso="3"><span><strong>Una conclusión que solo resume:</strong> falta un ejemplo concreto que conecte con las redes de hoy.</span></li>
+      <li data-paso="4"><span><strong>Referencias que no se pueden verificar,</strong> o especificaciones citadas sin año ni versión.</span></li>
+      <li data-paso="5"><span><strong>Diagramas copiados</strong> sin elaboración. En el segundo trabajo pesa todavía más: tiene un criterio propio.</span></li>
+    </ul>
+    <p class="nota">Revisa tu retroalimentación en la plataforma: cada criterio dice qué te faltó para el nivel siguiente.</p>
+  </section>
+
+  <!-- ============ BLOQUE 5 · CIERRE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="5">
+    <span class="numero">5</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Repaso de la semana y el tutor de la semana 5.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Repaso: lo que debes poder explicar</h2>
+    <div class="dos-columnas" style="grid-template-columns: 1fr 1fr">
+      <ul class="ideas compactas">
+        <li><span>SIP establece las llamadas; Diameter conecta con las bases de datos y las políticas.</span></li>
+        <li><span>P-CSCF: primera puerta. I-CSCF: entrada del dominio. S-CSCF: núcleo de la señalización.</span></li>
+        <li><span>HSS: perfiles y autenticación. PCRF: calidad de servicio de la voz.</span></li>
+        <li><span>MRF: conferencias y tonos. BGCF: salida a la red telefónica. MGCF: SIP ↔ ISUP con la PSTN.</span></li>
+      </ul>
+      <ul class="ideas compactas">
+        <li><span>Presencia, mensajería instantánea, Push-to-Talk (por turnos) y conferencias (todos a la vez).</span></li>
+        <li><span>La voz va por las portadoras, no por los CSCF. QCI 1 voz; QCI 5 señalización.</span></li>
+        <li><span>RoHC comprime cabeceras; HARQ retransmite rápido; DRX ahorra batería.</span></li>
+        <li><span>SR-VCC pasa la llamada a 2G o 3G; por WiFi se entra al IMS por el ePDG.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo usar el tutor</h2>
+    <ol>
+      <li>Abre el sitio del curso y pulsa <strong>Copiar tutor</strong> en la semana 5. También puedes <a href="../ver.html?f=semana-05/tutor.md">abrirlo aquí</a>.</li>
+      <li>Pégalo completo en ChatGPT, Gemini o Claude (sirve la versión gratuita).</li>
+      <li>Conversa 20–30 minutos. Te hará preguntas y no te dará respuestas.</li>
+      <li>Al final, envía tu ticket de entrada en el <a href="https://forms.cloud.microsoft/r/h4WBZUxVVN">formulario de tickets</a> hasta las 12:00 del martes 24 de noviembre.</li>
+    </ol>
+    <p class="nota">Si tienes poco tiempo, escribe RÁPIDO al empezar: irá directo a las preguntas de control.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Antes de irnos</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Este domingo, 22 nov</span><span>Aprendizaje Práctico de la semana 4.</span></li>
+      <li><span class="que">Entrega en curso</span><span>Aprendizaje Autónomo 2: vence el domingo 6 de diciembre. Empieza hoy tu tabla comparativa.</span></li>
+      <li><span class="que">Si ves la grabación</span><span>Calcula el ancho de banda de tu códec con y sin RoHC (bloque 3) y compruébalo con <code>voz.py</code>. Luego dibuja de memoria el flujo de la llamada, con el elemento del IMS que procesa cada mensaje.</span></li>
+      <li><span class="que">Próxima semana</span><span>5G. Explicaré la Evaluación en Contacto con el Docente. Antes, usa el <a href="../ver.html?f=semana-05/tutor.md">tutor de la semana 5</a>.</span></li>
+    </ul>
+  </section>
+
+</main>
+<script src="../assets/secuencia.js"></script>
+<script src="../assets/presentacion.js"></script>
+<script src="anim-rohc.js"></script>
+</body>
+</html>
