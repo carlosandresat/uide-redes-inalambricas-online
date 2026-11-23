@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fundamentos de Redes Inalámbricas · Semana 5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Overpass:wght@400;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="../assets/presentacion.css">
+  <script src="../assets/tema.js"></script>
+  <style>
+    .arq svg { width: 100%; height: auto; max-height: calc(var(--u) * 60); display: block; font-family: var(--f-texto); }
+    .arq .caja rect { fill: var(--caja-diagrama); }
+    .arq .caja text { fill: var(--texto-caja-diagrama); font-size: 22px; font-weight: 800; }
+    .arq .caja text.sub { font-size: 14px; font-weight: 600; }
+    .arq .externo rect { fill: none; stroke: var(--caja-diagrama); stroke-width: 3; }
+    .arq .externo text { fill: var(--tinta); font-size: 19px; font-weight: 800; }
+    .arq .enlace { stroke: var(--acento); stroke-width: 4; fill: none; }
+    .arq .enlace.control { stroke-dasharray: 9 7; stroke-width: 3; }
+    .arq .enlace.radio { stroke-dasharray: 3 6; }
+    .arq .bus { stroke: var(--acento); stroke-width: 7; }
+    .arq .interfaz { fill: var(--acento); font-family: var(--f-codigo); font-size: 16px; font-weight: 600; }
+    .arq .subsistema rect { fill: none; stroke: var(--tinta-suave); stroke-width: 2; stroke-dasharray: 8 6; }
+    .arq .subsistema text { fill: var(--tinta-suave); font-size: 18px; font-weight: 800; }
+    .lectura .arq { overflow-x: auto; }
+    .lectura .arq svg { min-width: 680px; }
+    .presentacion .respuesta-ia { font-size: calc(var(--u) * 2.45); }
+    .presentacion .caso-ia { grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 4); }
+    .presentacion .caso-ia .ideas.compactas li { font-size: calc(var(--u) * 3.1); }
+    .presentacion .tabla.apretada { font-size: calc(var(--u) * 2.9); }
+    .presentacion .tabla.apretada td, .presentacion .tabla.apretada th { padding-top: calc(var(--u) * 0.7); padding-bottom: calc(var(--u) * 0.7); }
+    .tabla td:first-child code { white-space: nowrap; }
+  </style>
+</head>
+<body data-curso="redes-inalambricas" data-formato="guiada" data-bloque2="5G: escenarios y núcleo" data-bloque3="La radio NR y los slices" data-bloque4="El trabajo final">
+<div class="barra-lectura">
+  <a href="../index.html">Volver al curso</a>
+  <button type="button" class="boton" data-alternar-tema>Modo oscuro</button>
+</div>
+<main class="escenario">
+
+  <section class="diapositiva portada">
+    <div class="portada-panel">
+      <span>Semana</span>
+      <span class="semana-numero">5</span>
+      <span>de 7</span>
+    </div>
+    <div class="portada-texto">
+      <p class="curso">Fundamentos de Redes Inalámbricas</p>
+      <h1>5G</h1>
+      <p class="objetivo">Entender qué promete 5G y qué hace cada función de su núcleo, cómo se corta el espectro con cada numerología y revisar con esa teoría un diseño de <em>network slicing</em> hecho por una IA.</p>
+      <p class="fecha">Martes 24 de noviembre · 19:00</p>
+      <div class="recorrido-completo"></div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Plan de hoy</h2>
+    <ol class="plan">
+      <li data-bloque="1">Pista para el Aprendizaje Práctico y lo que necesitas a mano.</li>
+      <li data-bloque="2">Los tres escenarios de 5G, el mapa del núcleo, quién hace qué, NSA o SA y el <em>network slicing</em>.</li>
+      <li data-bloque="3">La radio: numerología, bandas y MIMO masivo. La IA diseña tres <em>slices</em> y los revisamos. Tu propio cálculo.</li>
+      <li data-bloque="4">La Evaluación en Contacto con el Docente completa: qué pide, qué se puede hacer en Packet Tracer y cómo se califica.</li>
+      <li data-bloque="5">Repaso de los conceptos de la semana y el tutor de la semana 6.</li>
+    </ol>
+  </section>
+
+  <!-- ============ BLOQUE 1 · PUENTE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="1">
+    <span class="numero">1</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Para el Aprendizaje Práctico de este domingo</h2>
+    <p class="pista">Para cada función del núcleo 5G, pregúntate qué hace: ¿acceso y movilidad, sesiones, datos del usuario, autenticación, suscriptores, políticas, elección del <em>slice</em> o exposición a terceros? Relaciona cada caso de uso con lo que exige. Y para la radio: ¿qué cambia con la numerología, con la banda y con muchas antenas?</p>
+    <p class="nota">Una pista, no la pregunta. El cuestionario vence el domingo 29 de noviembre. Hoy explico, en orden, todos los conceptos que necesitas.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ten a mano para hoy</h2>
+    <ol class="plan">
+      <li><span class="min">1</span><span><strong>Una calculadora</strong>, o Python. En el bloque 3 calcularás la velocidad de una portadora 5G.</span></li>
+      <li><span class="min">2</span><span><strong>El último dígito de tu cédula:</strong> elige tu numerología.</span></li>
+      <li><span class="min">3</span><span>Opcional: descarga <a href="ejemplos/numerologia.py"><code>numerologia.py</code></a> para comprobar tu resultado. Y, si ya lo tienes, Packet Tracer abierto para el bloque 4.</span></li>
+    </ol>
+    <p class="nota">No hace falta haber leído antes: primero explico el tema completo y después lo practicamos. Las dudas, al chat en cualquier momento.</p>
+  </section>
+
+  <!-- ============ BLOQUE 2 · EXPLICACIÓN ============ -->
+
+  <section class="diapositiva bloque" data-bloque="2">
+    <span class="numero">2</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Qué promete 5G, el mapa de su núcleo, quién hace qué, NSA o SA y el <em>network slicing</em>.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Qué promete 5G: tres escenarios</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Escenario</th><th>Qué prioriza</th><th>Objetivo de la UIT</th><th>Ejemplos</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td><strong>eMBB</strong>: banda ancha móvil mejorada</td><td>velocidad</td><td>picos de 20 Gbit/s de bajada</td><td>video 4K, realidad virtual</td></tr>
+        <tr data-paso="2"><td><strong>URLLC</strong>: comunicaciones ultrafiables de baja latencia</td><td>latencia y fiabilidad</td><td>1 ms en la radio y 99,999 % de los paquetes a tiempo</td><td>robots, cirugía remota, vehículos</td></tr>
+        <tr data-paso="3"><td><strong>mMTC</strong>: comunicaciones masivas de tipo máquina</td><td>cantidad de dispositivos y batería</td><td>1 millón de dispositivos por km²</td><td>medidores, sensores</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="3">Una misma configuración no logra los tres al máximo a la vez: por eso existe el <em>network slicing</em>. Ojo: LTE-Advanced es la evolución de 4G (semana 3), no uno de estos escenarios.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tres ideas para llevarse</h2>
+    <ul class="ideas">
+      <li data-paso="1"><span>El núcleo 5G es una <strong>arquitectura basada en servicios</strong>: funciones de software que se ofrecen servicios entre sí (<strong>AMF</strong>, <strong>SMF</strong>, <strong>AUSF</strong>, <strong>UDM</strong>, <strong>PCF</strong>…), virtualizadas con <strong>NFV</strong>. La <strong>UPF</strong> lleva los datos.</span></li>
+      <li data-paso="2"><span>Tres escenarios: <strong>eMBB</strong> (mucha velocidad), <strong>URLLC</strong> (latencia de 1 ms y altísima fiabilidad) y <strong>mMTC</strong> (millones de sensores). El <strong><em>network slicing</em></strong> crea una red virtual para cada uno sobre la misma infraestructura.</span></li>
+      <li data-paso="3"><span>La <strong>Nueva Radio</strong> tiene <strong>numerología flexible</strong> (de 15 a 240 kHz entre subportadoras), bandas baja, media y milimétrica, y <strong>MIMO masivo</strong> con <em>beamforming</em> para atender a varios usuarios a la vez.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Si vienes de LTE</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Función</th><th>LTE (semana 3)</th><th>5G</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Estación base</td><td>eNodeB</td><td>gNB</td></tr>
+        <tr data-paso="1"><td>Acceso y movilidad</td><td>MME</td><td>AMF (termina la señalización NAS)</td></tr>
+        <tr data-paso="1"><td>Sesiones</td><td>MME y gateways</td><td>SMF</td></tr>
+        <tr data-paso="1"><td>Datos del usuario</td><td>S-GW y PDN-GW</td><td>UPF</td></tr>
+        <tr data-paso="2"><td>Suscriptores y autenticación</td><td>HSS</td><td>UDM y AUSF</td></tr>
+        <tr data-paso="2"><td>Políticas de QoS</td><td>PCRF</td><td>PCF</td></tr>
+        <tr data-paso="3"><td>Radio</td><td>15 kHz fijos, hasta 20 MHz</td><td>15 a 240 kHz; hasta 100 MHz (bandas bajas y medias) o 400 MHz (milimétricas)</td></tr>
+        <tr data-paso="3"><td>Antenas</td><td>MIMO de 2 a 4 capas</td><td>MIMO masivo (64 elementos o más) con <em>beamforming</em></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>El mapa del núcleo 5G</h2>
+    <figure class="arq">
+      <svg viewBox="0 0 1000 440" role="img" aria-label="Núcleo 5G con arquitectura basada en servicios: NSSF, NEF, NRF, PCF, UDM y AUSF se conectan a un bus de servicios junto con el AMF y el SMF. El móvil llega por radio al gNB; el gNB se conecta al AMF (N2) y a la UPF (N3). El SMF controla la UPF (N4) y la UPF sale a la red de datos (N6). El móvil habla NAS con el AMF (N1).">
+        <g data-paso="1">
+          <line class="bus" x1="230" y1="190" x2="990" y2="190"/>
+          <text class="interfaz" x="985" y="218" text-anchor="end">servicios sobre HTTP/2</text>
+          <line class="enlace" x1="350" y1="190" x2="350" y2="250"/>
+          <line class="enlace" x1="560" y1="190" x2="560" y2="250"/>
+          <g class="caja"><rect x="280" y="250" width="140" height="66" rx="10"/><text x="350" y="280" text-anchor="middle">AMF</text><text class="sub" x="350" y="302" text-anchor="middle">acceso y movilidad</text></g>
+          <g class="caja"><rect x="490" y="250" width="140" height="66" rx="10"/><text x="560" y="280" text-anchor="middle">SMF</text><text class="sub" x="560" y="302" text-anchor="middle">sesiones</text></g>
+        </g>
+        <g data-paso="2">
+          <line class="enlace" x1="300" y1="126" x2="300" y2="190"/>
+          <line class="enlace" x1="420" y1="126" x2="420" y2="190"/>
+          <line class="enlace" x1="540" y1="126" x2="540" y2="190"/>
+          <line class="enlace" x1="660" y1="126" x2="660" y2="190"/>
+          <line class="enlace" x1="780" y1="126" x2="780" y2="190"/>
+          <line class="enlace" x1="900" y1="126" x2="900" y2="190"/>
+          <g class="caja"><rect x="245" y="60" width="110" height="66" rx="10"/><text x="300" y="90" text-anchor="middle">NSSF</text><text class="sub" x="300" y="112" text-anchor="middle">elige el slice</text></g>
+          <g class="caja"><rect x="365" y="60" width="110" height="66" rx="10"/><text x="420" y="90" text-anchor="middle">NEF</text><text class="sub" x="420" y="112" text-anchor="middle">expone a terceros</text></g>
+          <g class="caja"><rect x="485" y="60" width="110" height="66" rx="10"/><text x="540" y="90" text-anchor="middle">NRF</text><text class="sub" x="540" y="112" text-anchor="middle">directorio</text></g>
+          <g class="caja"><rect x="605" y="60" width="110" height="66" rx="10"/><text x="660" y="90" text-anchor="middle">PCF</text><text class="sub" x="660" y="112" text-anchor="middle">políticas QoS</text></g>
+          <g class="caja"><rect x="725" y="60" width="110" height="66" rx="10"/><text x="780" y="90" text-anchor="middle">UDM</text><text class="sub" x="780" y="112" text-anchor="middle">suscriptores</text></g>
+          <g class="caja"><rect x="845" y="60" width="110" height="66" rx="10"/><text x="900" y="90" text-anchor="middle">AUSF</text><text class="sub" x="900" y="112" text-anchor="middle">autenticación</text></g>
+          <g class="subsistema"><rect x="230" y="40" width="760" height="395" rx="14"/><text x="975" y="425" text-anchor="end">5GC · núcleo 5G</text></g>
+        </g>
+        <g data-paso="3">
+          <line class="enlace radio" x1="80" y1="303" x2="110" y2="303"/>
+          <path class="enlace control" d="M220,290 L280,283"/>
+          <text class="interfaz" x="250" y="276" text-anchor="middle">N2</text>
+          <path class="enlace" d="M165,336 L165,390 L490,390"/>
+          <text class="interfaz" x="300" y="380" text-anchor="middle">N3</text>
+          <line class="enlace control" x1="560" y1="316" x2="560" y2="360"/>
+          <text class="interfaz" x="570" y="344">N4</text>
+          <line class="enlace" x1="630" y1="390" x2="700" y2="390"/>
+          <text class="interfaz" x="665" y="380" text-anchor="middle">N6</text>
+          <g class="caja"><rect x="0" y="270" width="80" height="66" rx="10"/><text x="40" y="300" text-anchor="middle">UE</text><text class="sub" x="40" y="322" text-anchor="middle">móvil</text></g>
+          <g class="caja"><rect x="110" y="270" width="110" height="66" rx="10"/><text x="165" y="300" text-anchor="middle">gNB</text><text class="sub" x="165" y="322" text-anchor="middle">radio NR</text></g>
+          <g class="caja"><rect x="490" y="360" width="140" height="62" rx="10"/><text x="560" y="388" text-anchor="middle">UPF</text><text class="sub" x="560" y="410" text-anchor="middle">datos del usuario</text></g>
+          <g class="externo"><rect x="700" y="364" width="160" height="54" rx="10"/><text x="780" y="398" text-anchor="middle">red de datos</text></g>
+        </g>
+        <g data-paso="4">
+          <path class="enlace control" d="M40,270 C40,180 200,160 300,250"/>
+          <text class="interfaz" x="110" y="190">N1 · NAS</text>
+        </g>
+      </svg>
+      <figcaption>Arriba, el plano de control: funciones que se ofrecen servicios por un bus común (el NRF es el directorio para encontrarse). Abajo, la UPF lleva los datos. Cada función es software que puede correr virtualizado (NFV).</figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Las funciones del núcleo 5G: quién hace qué</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>Función</th><th>Qué hace</th><th>Si vienes de software</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td><code>AMF</code></td><td>acceso y movilidad; termina la señalización NAS con el dispositivo</td><td>la recepción que registra y sigue al usuario</td></tr>
+        <tr data-paso="1"><td><code>SMF</code></td><td>crea y gestiona las sesiones de datos; controla la UPF</td><td>el que abre y cierra conexiones</td></tr>
+        <tr data-paso="1"><td><code>UPF</code></td><td>enruta y entrega los datos del usuario</td><td>el cartero</td></tr>
+        <tr data-paso="2"><td><code>AUSF</code></td><td>autentica a los dispositivos, junto con el UDM</td><td>el servicio de inicio de sesión</td></tr>
+        <tr data-paso="2"><td><code>UDM</code></td><td>datos de los suscriptores, centralizados</td><td>la base de usuarios</td></tr>
+        <tr data-paso="2"><td><code>PCF</code></td><td>políticas de calidad de servicio</td><td>el motor de reglas</td></tr>
+        <tr data-paso="3"><td><code>NSSF</code></td><td>elige el <em>slice</em> adecuado para cada dispositivo</td><td>el que asigna el carril</td></tr>
+        <tr data-paso="3"><td><code>NEF</code></td><td>expone capacidades de la red a aplicaciones externas</td><td>la API pública</td></tr>
+        <tr data-paso="3"><td><code>NRF</code></td><td>directorio donde las funciones se registran y se encuentran</td><td>el registro de servicios</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>NSA o SA: con o sin núcleo LTE</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>No autónoma (NSA)</h3>
+        <ul class="ideas compactas">
+          <li data-paso="1"><span>La radio NR se suma a un eNodeB LTE (EN-DC) y usa el <strong>núcleo LTE</strong> (EPC).</span></li>
+          <li data-paso="2"><span>Fue la forma rápida de lanzar 5G aprovechando la infraestructura existente: más velocidad, pero sin las capacidades nuevas del núcleo.</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Autónoma (SA)</h3>
+        <ul class="ideas compactas">
+          <li data-paso="3"><span>gNB con el <strong>núcleo 5G completo</strong>, sin depender de LTE.</span></li>
+          <li data-paso="4"><span>Es la que aprovecha todo: <em>network slicing</em>, la latencia baja de URLLC y la arquitectura basada en servicios.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2><em>Network slicing</em>: varias redes sobre la misma</h2>
+    <ul class="ideas compactas">
+      <li data-paso="1"><span>Un <strong><em>slice</em></strong> es una red lógica de extremo a extremo (radio, transporte y núcleo) con sus propias garantías: velocidad, latencia o cantidad de dispositivos.</span></li>
+      <li data-paso="2"><span>Se construye con software: <strong>NFV</strong> ejecuta las funciones del núcleo como programas virtualizados, y <strong>SDN</strong> programa la red desde un controlador.</span></li>
+      <li data-paso="3"><span>La <strong>NSSF</strong> elige el <em>slice</em> de cada dispositivo. Cada <em>slice</em> puede tener su propio SMF y su propia UPF; por ejemplo, una UPF dentro de una fábrica para recortar la latencia.</span></li>
+      <li data-paso="4"><span>Necesita el núcleo 5G: es una capacidad de la arquitectura SA.</span></li>
+    </ul>
+    <p class="nota">Como una autopista con carriles exclusivos para ambulancias, buses y autos: el mismo asfalto, reglas distintas para cada carril.</p>
+  </section>
+
+  <!-- ============ BLOQUE 3 · PRÁCTICA GUIADA ============ -->
+
+  <section class="diapositiva bloque" data-bloque="3">
+    <span class="numero">3</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Cómo corta el espectro la Nueva Radio, qué banda sirve para qué y el MIMO masivo. Con eso revisamos un diseño de <em>slices</em> de la IA y hacemos tu cálculo.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Numerología: cómo se corta el espectro en 5G</h2>
+    <p>En LTE las subportadoras miden siempre 15 kHz. En 5G se elige el espaciado según el uso: esa elección es la <strong>numerología</strong>, μ.</p>
+    <ul class="ideas compactas">
+      <li data-paso="1"><span><strong>Espaciado</strong> entre subportadoras = 15 kHz × 2<sup>μ</sup>.</span></li>
+      <li data-paso="2"><span>Un <strong>símbolo</strong> dura 1 / espaciado: el doble de ancho, la mitad de duración.</span></li>
+      <li data-paso="3"><span>Una <strong>ranura</strong> son 14 símbolos y dura 1 ms / 2<sup>μ</sup>. Ranuras más cortas, menos latencia.</span></li>
+      <li data-paso="4"><span><strong>Ejemplo, μ = 1:</strong> 30 kHz, símbolo útil de 33,3 µs y ranuras de 0,5 ms: 2 por milisegundo.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva pregunta">
+    <p class="nota">Responde en el Forms del chat de la reunión</p>
+    <p class="enunciado">En 5G NR, con numerología μ = 2, ¿cuánto dura una ranura de 14 símbolos?</p>
+    <ol class="opciones">
+      <li>1 ms</li>
+      <li>0,5 ms</li>
+      <li>0,25 ms</li>
+      <li>0,125 ms</li>
+    </ol>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La regla de la numerología</h2>
+    <table class="tabla">
+      <thead><tr><th>μ</th><th>Subportadoras</th><th>Ranura</th><th>Ranuras por ms</th><th>Uso típico</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>0</td><td>15 kHz</td><td class="resultado">1 ms</td><td>1</td><td>bandas bajas, celdas grandes (como LTE)</td></tr>
+        <tr data-paso="1"><td>1</td><td>30 kHz</td><td class="resultado">0,5 ms</td><td>2</td><td>banda media, por ejemplo 3,5 GHz</td></tr>
+        <tr data-paso="2"><td>2</td><td>60 kHz</td><td class="resultado">0,25 ms</td><td>4</td><td>banda media o milimétrica</td></tr>
+        <tr data-paso="3"><td>3</td><td>120 kHz</td><td class="resultado">0,125 ms</td><td>8</td><td>ondas milimétricas</td></tr>
+        <tr data-paso="3"><td>4</td><td>240 kHz</td><td class="resultado">0,0625 ms</td><td>16</td><td>milimétricas, para la sincronización</td></tr>
+      </tbody>
+    </table>
+    <p data-paso="4">Respuesta: <mark>0,25 ms</mark>. Más espaciado, símbolos más cortos: menos latencia, pero un prefijo cíclico más corto, que tolera menos ecos. Por eso la numerología se ajusta al escenario.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La misma rejilla con cada numerología</h2>
+    <figure id="anim-numerologia">
+      <figcaption class="solo-lector">Una ventana de 1 ms por 120 kHz. Al subir μ, cada elemento de recurso es el doble de alto y la mitad de angosto, las ranuras se acortan a la mitad y el prefijo cíclico también. <span data-paso="1"></span><span data-paso="2"></span><span data-paso="3"></span><span data-paso="4"></span><span data-paso="5"></span></figcaption>
+    </figure>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Bandas y MIMO masivo</h2>
+    <div class="dos-columnas">
+      <table class="tabla apretada">
+        <thead><tr><th>Banda</th><th>Cobertura</th><th>Ancho de banda</th></tr></thead>
+        <tbody>
+          <tr><td>Baja (menos de 1 GHz)</td><td>la mayor: penetra edificios</td><td>poco: menor velocidad</td></tr>
+          <tr><td>Media (1 a 6 GHz, como 3,5 GHz)</td><td>intermedia</td><td>hasta 100 MHz</td></tr>
+          <tr><td>Milimétrica (más de 24 GHz)</td><td>cientos de metros</td><td>hasta 400 MHz</td></tr>
+        </tbody>
+      </table>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong><em>Beamforming</em>:</strong> el arreglo dirige la energía en un haz hacia cada usuario.</span></li>
+        <li data-paso="2"><span><strong>MU-MIMO:</strong> varios usuarios en el mismo tiempo y frecuencia, cada uno en su haz.</span></li>
+        <li data-paso="3"><span>A 3,5 GHz, 64 elementos separados λ/2 caben en unos 34 × 34 cm; a 700 MHz harían falta 1,7 m. Por eso el MIMO masivo encaja en la banda media.</span></li>
+        <li data-paso="4"><span>Con muchas antenas, el canal efectivo casi no fluctúa (<em>channel hardening</em>): hacen falta menos márgenes de potencia.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Le pedimos a la IA un diseño de <em>slices</em></h2>
+    <div class="dos-columnas">
+      <div>
+        <p>Le pedimos:</p>
+        <pre class="prompt">Diseña tres network slices para un operador 5G en una ciudad: uno para video y navegación, otro para robots de una fábrica y otro para medidores de agua. Indica para cada uno qué exige, qué numerología y qué banda usarías, y por qué.</pre>
+      </div>
+      <div>
+        <h3>Para interpretar su respuesta</h3>
+        <ul>
+          <li data-paso="1">¿Qué escenario de 5G corresponde a cada <em>slice</em>?</li>
+          <li data-paso="2">¿Cada elección de numerología y de banda es coherente con lo que exige?</li>
+          <li data-paso="3">¿Qué función del núcleo elige el <em>slice</em> de cada dispositivo?</li>
+          <li data-paso="4">¿Son tres redes físicas?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Lo que respondió, leído con la teoría</h2>
+    <div class="dos-columnas caso-ia">
+      <pre class="prompt respuesta-ia">Slice 1, eMBB (video): más de 1 Gbit/s. μ = 1 en 3,5 GHz, 100 MHz y MIMO masivo.
+Slice 2, URLLC (robots): latencia menor de 1 ms y 99,999 % de fiabilidad. μ = 3 en una celda pequeña de la planta, núcleo cerca de la fábrica.
+Slice 3, mMTC (medidores): millones de dispositivos por km². μ = 4, porque transmite más rápido y así la batería dura más.
+La NSSF asigna a cada dispositivo su slice; los tres comparten antenas y núcleo.</pre>
+      <ul class="ideas compactas">
+        <li data-paso="1"><span><strong><em>Slice</em> 1:</strong> coherente. La banda media equilibra cobertura y ancho de banda; el MIMO masivo multiplica la capacidad.</span></li>
+        <li data-paso="2"><span><strong><em>Slice</em> 2:</strong> coherente. Ranuras de 0,125 ms y una UPF cerca de la planta recortan la latencia.</span></li>
+        <li data-paso="3"><span><strong><em>Slice</em> 3:</strong> falso. Un medidor envía pocos bytes desde sótanos: necesita cobertura (banda baja, μ = 0) y dormir casi siempre. Además, μ = 4 se usa solo para sincronización.</span></li>
+        <li data-paso="4"><span><strong>Cierre:</strong> bien. Son redes lógicas sobre la misma infraestructura, con SDN y NFV.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Ejemplo resuelto: μ = 1, 50 MHz, 64QAM, 4 capas</h2>
+    <table class="tabla">
+      <thead><tr><th>Paso</th><th>Cálculo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr data-paso="1"><td>Espaciado y ranura</td><td>15 × 2<sup>1</sup> kHz; 1 ms / 2<sup>1</sup></td><td class="resultado">30 kHz; 0,5 ms</td></tr>
+        <tr data-paso="2"><td>Bloques de recursos (tabla de 3GPP)</td><td>50 MHz con 30 kHz</td><td class="resultado">133 RB</td></tr>
+        <tr data-paso="3"><td>Ancho ocupado</td><td>133 × 12 × 30 kHz</td><td class="resultado">47,9 MHz (96 %)</td></tr>
+        <tr data-paso="4"><td>Ranuras por segundo</td><td>1000 × 2<sup>1</sup></td><td class="resultado">2000</td></tr>
+        <tr data-paso="5"><td>Tasa bruta</td><td>133 × 12 × 14 × 2000 × 6 × 4</td><td class="resultado">1072,5 Mbit/s</td></tr>
+      </tbody>
+    </table>
+    <p class="nota" data-paso="5">Bloques × 12 subportadoras × 14 símbolos × ranuras por segundo × bits por símbolo (64QAM: 6) × capas. Tasa bruta: sin descontar control, referencia ni codificación.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Tu turno: el mismo ancho, otra numerología</h2>
+    <p>Un operador tiene 100 MHz, 64QAM y 4 capas. Tu μ según el último dígito de tu cédula: <strong>0–3</strong> μ = 1 (273 bloques) · <strong>4–6</strong> μ = 2 (135 bloques) · <strong>7–9</strong> μ = 3 (66 bloques).</p>
+    <ol class="plan">
+      <li><span class="min">0–1</span><span>Espaciado y duración de la ranura.</span></li>
+      <li><span class="min">1–4</span><span>Tasa bruta, con la fórmula del ejemplo resuelto.</span></li>
+      <li><span class="min">4–5</span><span>Escribe en el chat tu μ, tu ranura y tu tasa. ¿Más espaciado dio más velocidad, como dijo la IA del <em>slice</em> 3?</span></li>
+    </ol>
+    <div class="consigna-pie">
+      <p class="nota">Compruébalo con <code>python numerologia.py 2 100 64QAM 4</code> (con tu μ). ¿Te salió algo raro? Pégalo en el chat.</p>
+      <button class="temporizador" type="button" data-minutos="5" aria-label="Temporizador de la consigna"></button>
+    </div>
+  </section>
+
+  <!-- ============ BLOQUE 4 · TRABAJO FINAL ============ -->
+
+  <section class="diapositiva bloque" data-bloque="4">
+    <span class="numero">4</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>La Evaluación en Contacto con el Docente completa: qué pide, qué se puede hacer de verdad en Packet Tracer y cómo se califica.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Evaluación en Contacto con el Docente</h2>
+    <div class="dos-columnas">
+      <div>
+        <h3>El caso</h3>
+        <ul>
+          <li>Una PYME de 20 empleados quiere telefonía IP sobre su WiFi sin que la voz se degrade con la red congestionada.</li>
+          <li>Diseñas y simulas la red en <strong>Packet Tracer</strong>: 3 puntos de acceso, telefonía IP, VLAN de voz, QoS y WPA2-Enterprise.</li>
+          <li>La pruebas en tres escenarios, investigas SIP, RTP y RTCP, y escribes un reporte técnico de unas 9 páginas.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Datos clave</h3>
+        <ul>
+          <li>Es <strong>individual</strong>. 34 puntos.</li>
+          <li>Integra la voz (semana 4) con la WLAN (semana 6). El sensor IoT es opcional.</li>
+          <li>Vence el <strong>domingo 13 de diciembre</strong>.</li>
+        </ul>
+        <p><a href="../ver.html?f=entregas/ecd.md">Guía completa y rúbrica</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>La plataforma dice, y qué hacer</h2>
+    <table class="tabla apretada">
+      <thead><tr><th>La plataforma dice</th><th>Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td>Servidor Asterisk, punto de acceso Cisco CAP3502, teléfonos Yealink</td><td>Usa los equivalentes de Packet Tracer: telefonía en un <em>router</em> con <code>telephony-service</code> y los teléfonos IP del simulador.</td></tr>
+        <tr><td>«MOS 4,3, latencia 35 ms, <em>jitter</em> 12 ms…»</td><td>Son valores de referencia, no resultados para copiar. Reporta lo que el simulador muestra; si das MOS o <em>jitter</em>, preséntalos como estimación justificada.</td></tr>
+        <tr><td>WPA3-Enterprise, 5 GHz y SIP con TLS en la rúbrica</td><td>Basta con WPA2-Enterprise con servidor RADIUS. Lo demás suma solo si el simulador lo permite.</td></tr>
+        <tr><td><em>Handover</em> sin pérdida y análisis en Wireshark</td><td>Opcionales.</td></tr>
+        <tr><td>Escala «31–34 Excelente…»</td><td>La nota es la suma de los criterios de la guía.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo se califica</h2>
+    <ul class="cierre-lista">
+      <li data-paso="1"><span class="que">Configuración (6)</span><span>3 puntos de acceso en los canales 1, 6 y 11; WPA2-Enterprise con RADIUS; VLAN de voz y datos; DSCP EF para la voz; llamadas entre puntos de acceso distintos.</span></li>
+      <li data-paso="2"><span class="que">Simulaciones (8)</span><span>Normal, congestión sin QoS y con QoS, cada uno con evidencia del simulador y análisis con la teoría.</span></li>
+      <li data-paso="3"><span class="que">Reporte (10)</span><span>Estructura completa, diagrama propio, tablas comparativas, incluida G.711 frente a G.729 con cabeceras.</span></li>
+      <li data-paso="4"><span class="que">Investigación (6)</span><span>SIP, RTP y RTCP con un flujo de ejemplo; 3 problemas reales de VoIP en WiFi y 3 soluciones conectadas.</span></li>
+      <li data-paso="5"><span class="que">Presentación (3) · IoT (+1)</span><span>APA 7 y diseño profesional. Un sensor IoT funcionando, opcional.</span></li>
+    </ul>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo organizarte</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Esta semana</span><span>Arma la topología: <em>switch</em>, <em>router</em> con telefonía, 3 puntos de acceso, servidor RADIUS y teléfonos. Haz la primera llamada.</span></li>
+      <li><span class="que">Semana 6</span><span>WLAN: canales 1, 6 y 11, WPA2-Enterprise y la priorización de la voz (WMM). Agrega VLAN y QoS y corre los tres escenarios.</span></li>
+      <li><span class="que">Semana 7</span><span>Investigación, tabla G.711 frente a G.729 (el método es el de la semana 4) y el reporte. La sesión es para tus dudas.</span></li>
+    </ul>
+    <p class="nota">Guarda capturas de cada configuración y de cada escenario mientras trabajas: son tu evidencia.</p>
+  </section>
+
+  <!-- ============ BLOQUE 5 · CIERRE ============ -->
+
+  <section class="diapositiva bloque" data-bloque="5">
+    <span class="numero">5</span>
+    <div class="bloque-texto">
+      <h2></h2>
+      <p class="minutos"></p>
+      <p>Repaso de la semana, el Aprendizaje Autónomo 2 y el tutor de la semana 6.</p>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Repaso: lo que debes poder explicar</h2>
+    <div class="dos-columnas" style="grid-template-columns: 1fr 1fr">
+      <ul class="ideas compactas">
+        <li><span>eMBB: velocidad. URLLC: menos de 1 ms en la radio y fiabilidad. mMTC: millones de dispositivos.</span></li>
+        <li><span>AMF: acceso, movilidad y NAS. SMF: sesiones. UPF: lleva los datos.</span></li>
+        <li><span>AUSF autentica; UDM guarda los suscriptores; PCF fija las políticas de QoS.</span></li>
+        <li><span>NSSF elige el <em>slice</em>; NEF expone la red a terceros; NFV virtualiza las funciones.</span></li>
+      </ul>
+      <ul class="ideas compactas">
+        <li><span><em>Network slicing</em>: redes virtuales sobre la misma infraestructura. NSA usa el núcleo LTE; SA aprovecha todo.</span></li>
+        <li><span>Numerología flexible: 15 kHz × 2<sup>μ</sup>, hasta 240 kHz; más espaciado, símbolos más cortos.</span></li>
+        <li><span>Banda baja: cobertura. Banda media: MIMO masivo. Milimétrica: capacidad.</span></li>
+        <li><span><em>Beamforming</em> dirige haces; MU-MIMO atiende a varios a la vez; <em>channel hardening</em>: menos márgenes.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Cómo usar el tutor</h2>
+    <ol>
+      <li>Abre el sitio del curso y pulsa <strong>Copiar tutor</strong> en la semana 6. También puedes <a href="../ver.html?f=semana-06/tutor.md">abrirlo aquí</a>.</li>
+      <li>Pégalo completo en ChatGPT, Gemini o Claude (sirve la versión gratuita).</li>
+      <li>Conversa 20–30 minutos. Te hará preguntas y no te dará respuestas.</li>
+      <li>Al final, envía tu ticket de entrada en el <a href="https://forms.cloud.microsoft/r/h4WBZUxVVN">formulario de tickets</a> hasta las 12:00 del martes 1 de diciembre.</li>
+    </ol>
+    <p class="nota">Si tienes poco tiempo, escribe RÁPIDO al empezar: irá directo a las preguntas de control.</p>
+  </section>
+
+  <section class="diapositiva">
+    <h2>Antes de irnos</h2>
+    <ul class="cierre-lista">
+      <li><span class="que">Este domingo, 29 nov</span><span>Aprendizaje Práctico de la semana 5.</span></li>
+      <li><span class="que">Entregas en curso</span><span>Aprendizaje Autónomo 2: vence el domingo 6 de diciembre; hoy empezaste la columna 5G de tu tabla. Evaluación en Contacto con el Docente: el 13 de diciembre; arma tu topología esta semana.</span></li>
+      <li><span class="que">Si ves la grabación</span><span>Resuelve el «Tu turno» con las tres numerologías y compruébalo con <code>numerologia.py</code>. Luego corrige el <em>slice</em> de los medidores: elige numerología y banda, y justifica.</span></li>
+      <li><span class="que">Próxima semana</span><span>WLAN. Antes de la sesión, usa el <a href="../ver.html?f=semana-06/tutor.md">tutor de la semana 6</a>.</span></li>
+    </ul>
+  </section>
+
+</main>
+<script src="../assets/presentacion.js"></script>
+<script src="anim-numerologia.js"></script>
+</body>
+</html>
